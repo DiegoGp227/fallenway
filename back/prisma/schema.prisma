@@ -1,0 +1,115 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  telegramChatId     String?   @unique
+  telegramLinkedAt   DateTime?
+  telegramActive     Boolean   @default(false)
+
+  linkToken          String?   @unique
+  linkTokenExpiresAt DateTime?
+
+  reminderTime String?
+  timezone     String  @default("America/Bogota")
+
+  habits Habit[]
+
+  @@map("users")
+}
+
+model Habit {
+  id          String    @id @default(cuid())
+  userId      String
+  name        String
+  description String?
+  color       String?
+  sortOrder   Int       @default(0)
+  active      Boolean   @default(true)
+  archivedAt  DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  frequency    Frequency @default(DAILY)
+  weekDays     Int[]     @default([])
+  timesPerWeek Int?
+  intervalDays Int?
+
+  user     User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subtasks Subtask[]
+  logs     HabitLog[]
+
+  @@map("habits")
+}
+
+enum Frequency {
+  DAILY
+  SPECIFIC_DAYS
+  TIMES_PER_WEEK
+  EVERY_N_DAYS
+}
+
+model Subtask {
+  id        String   @id @default(cuid())
+  habitId   String
+  name      String
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+
+  habit Habit        @relation(fields: [habitId], references: [id], onDelete: Cascade)
+  logs  SubtaskLog[]
+
+  @@map("subtasks")
+}
+
+model HabitLog {
+  id        String    @id @default(cuid())
+  habitId   String
+  date      DateTime  @db.Date
+  status    LogStatus
+  note      String?
+  source    LogSource @default(WEB)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  habit       Habit        @relation(fields: [habitId], references: [id], onDelete: Cascade)
+  subtaskLogs SubtaskLog[]
+
+  @@unique([habitId, date])
+  @@map("habit_logs")
+}
+
+enum LogStatus {
+  COMPLETED
+  SKIPPED
+}
+
+enum LogSource {
+  WEB
+  TELEGRAM
+}
+
+model SubtaskLog {
+  id          String   @id @default(cuid())
+  habitLogId  String
+  subtaskId   String
+  completedAt DateTime @default(now())
+
+  habitLog HabitLog @relation(fields: [habitLogId], references: [id], onDelete: Cascade)
+  subtask  Subtask  @relation(fields: [subtaskId], references: [id], onDelete: Cascade)
+
+  @@unique([habitLogId, subtaskId])
+  @@map("subtask_logs")
+}
