@@ -10,7 +10,6 @@ const passwordSchema = z.string().min(8);
 
 const nameSchema = z.string().min(1);
 
-
 /* =========================
    Signup
 ========================= */
@@ -21,8 +20,14 @@ export const signupSchema = z.object({
   name: nameSchema,
 });
 
+export const loginSchema = z.object({
+  email: emailSchema,
+  password: passwordSchema,
+});
+
 /* =========================
    Types
 ========================= */
 
+export type LoginDTO = z.infer<typeof loginSchema>;
 export type SignupDTO = z.infer<typeof signupSchema>;
