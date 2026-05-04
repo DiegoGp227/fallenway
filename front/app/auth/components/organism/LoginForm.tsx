@@ -73,7 +73,7 @@ export default function LoginForm() {
         type="button"
         onClick={() => login(DEMO_CREDENTIALS)}
         disabled={loading}
-        className="flex items-center justify-center gap-2 border-2 border-accent px-1 py-2 bg-base hover:bg-gray-900 transition-all duration-500 rounded font-semibold text-white cursor-pointer"
+        className="flex items-center justify-center gap-2 border-2 border-accent px-1 py-2 bg-base transition-all duration-500 rounded font-semibold text-white cursor-pointer hover:bg-accent-dark hover:border-accent-dark"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -92,7 +92,7 @@ export default function LoginForm() {
 
       <button
         type="submit"
-        className="flex items-center justify-center gap-2 border-2 border-accent px-1 py-2 bg-accent hover:bg-accent transition-all duration-500 text-white cursor-pointer"
+        className="flex items-center justify-center gap-2 border-2 border-accent px-1 py-2 bg-accent transition-all duration-500 text-white cursor-pointer hover:bg-accent-dark hover:border-accent-dark"
         disabled={loading}
       >
         {loading ? (

@@ -13,7 +13,7 @@ export default function SelectAuthSystem({
         onClick={() => setIsLogin(true)}
         className={`flex-1 py-1.5 rounded-md text-sm font-medium transition-all duration-200 cursor-pointer ${
           isLogin
-            ? "bg-bg shadow-sm text-text"
+            ? "bg-bg shadow-sm text-accent transition-all duration-500"
             : "text-fg-muted hover:text-text"
         }`}
       >
@@ -23,7 +23,7 @@ export default function SelectAuthSystem({
         onClick={() => setIsLogin(false)}
         className={`flex-1 py-1.5 rounded-md text-sm font-medium transition-all duration-200 cursor-pointer ${
           !isLogin
-            ? "bg-bg shadow-sm text-text"
+            ? "bg-bg shadow-sm text-accent transition-all duration-500"
             : "text-fg-muted hover:text-text"
         }`}
       >
