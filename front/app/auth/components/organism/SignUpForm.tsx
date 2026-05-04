@@ -1,5 +1,6 @@
 import { useSignUp } from "@/src/auth/hooks/useSignUp";
 import { ICreateUserRequest } from "@/src/auth/types/auth.types";
+import { SendHorizontalIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
@@ -26,52 +27,62 @@ export default function SignUpForm() {
       onSubmit={handleSubmit(signup)}
     >
       <div className="flex flex-col">
-        <label htmlFor="name" className="text-fg-muted">
-          Name
-        </label>
         <input
           id="name"
           type="text"
-          className="w-full border-2 border-border px-1 py-2 rounded focus:outline-none focus:border-blue-600 transition-all duration-500"
+          className="peer order-2 border-2 border-border px-1 py-2 rounded focus:outline-none focus:border-accent focus:bg-accent/5 transition-all duration-500"
           {...register("name")}
           disabled={loading}
         />
+        <label
+          htmlFor="name"
+          className="order-1 text-fg-muted peer-focus:text-accent transition-colors duration-500"
+        >
+          Name
+        </label>
         {errors.name && (
           <p className="text-red-500 text-sm">{errors.name.message}</p>
         )}
       </div>
       <div className="flex flex-col">
-        <label htmlFor="email" className="text-fg-muted">
-          Email
-        </label>
         <input
           id="email"
           type="email"
-          className="border-2 border-border px-1 py-2 rounded focus:outline-none focus:border-blue-600 transition-all duration-500"
+          className="peer order-2 border-2 border-border px-1 py-2 rounded focus:outline-none focus:border-accent focus:bg-accent/5 transition-all duration-500"
           {...register("email")}
           disabled={loading}
         />
+        <label
+          htmlFor="email"
+          className="order-1 text-fg-muted peer-focus:text-accent transition-colors duration-500"
+        >
+          Email
+        </label>
       </div>
       <div className="flex flex-col">
-        <label htmlFor="password" className="text-fg-muted">
-          Password
-        </label>
         <input
           id="password"
           type="password"
-          className="border-2 border-border px-1 py-2 rounded focus:outline-none focus:border-blue-600 transition-all duration-500"
+          className="peer order-2 border-2 border-border px-1 py-2 rounded focus:outline-none focus:border-accent focus:bg-accent/5 transition-all duration-500"
           {...register("password")}
           disabled={loading}
         />
+        <label
+          htmlFor="password"
+          className="order-1 text-fg-muted peer-focus:text-accent transition-colors duration-500"
+        >
+          Password
+        </label>
       </div>
 
       {error && <p className="text-red-500 text-sm">{error}</p>}
 
       <button
         type="submit"
-        className="border-2 border-border px-1 py-2 bg-blue-600 hover:bg-blue-700 transition-all duration-500"
+        className="flex items-center justify-center gap-2 border-2 border-accent px-1 py-2 bg-accent hover:bg-accent transition-all duration-500 text-white cursor-pointer"
         disabled={loading}
       >
+        <SendHorizontalIcon />
         {loading ? "loading..." : "send"}
       </button>
     </form>
