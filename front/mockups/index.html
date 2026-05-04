@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HabitOS</title>
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg: #13162a;
+      --surface: #1c1f35;
+      --border: #252840;
+      --border-hover: #333650;
+      --accent: #f01454;
+      --accent-dark: #a00d38;
+      --accent-bright: #f5527a;
+      --green: #2dd4a0;
+      --green-dim: #0d3d2e;
+      --amber: #f5a623;
+      --text: #c0c4e2;
+      --text-muted: #7a7e9a;
+      --text-dim: #40445e;
+      --completed-bg: #0f1120;
+      --nav-hover: #1a1d33;
+      --radius: 10px;
+      --radius-sm: 6px;
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, sans-serif;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .layout {
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      width: 200px;
+      flex-shrink: 0;
+      background: var(--surface);
+      border-right: 0.5px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      padding: 20px 0;
+    }
+
+    .sidebar-logo {
+      padding: 0 18px 24px;
+      border-bottom: 0.5px solid var(--border);
+      margin-bottom: 12px;
+    }
+
+    .logo-text {
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+      color: var(--text);
+    }
+
+    .logo-text span {
+      color: var(--accent);
+    }
+
+    .logo-sub {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .nav {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      padding: 0 10px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 10px;
+      border-radius: var(--radius-sm);
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 13.5px;
+      font-weight: 500;
+      transition: background 0.15s, color 0.15s;
+      user-select: none;
+      text-decoration: none;
+    }
+
+    .nav-item:hover {
+      background: var(--nav-hover);
+      color: var(--text);
+    }
+
+    .nav-item.active {
+      background: rgba(240, 20, 84, 0.15);
+      color: var(--accent-bright);
+    }
+
+    .nav-icon {
+      width: 16px;
+      text-align: center;
+      font-size: 14px;
+      opacity: 0.9;
+    }
+
+    .sidebar-footer {
+      margin-top: auto;
+      padding: 16px 18px 0;
+      border-top: 0.5px solid var(--border);
+    }
+
+    .user-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--accent-dark);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+      color: #fff;
+      flex-shrink: 0;
+    }
+
+    .user-name {
+      font-size: 12.5px;
+      font-weight: 500;
+      color: var(--text-muted);
+    }
+
+    /* ── MAIN ── */
+    .main {
+      flex: 1;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      padding: 24px 28px;
+      gap: 18px;
+    }
+
+    /* ── HEADER ── */
+    .header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+    }
+
+    .header-left h1 {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.4px;
+    }
+
+    .header-left .date {
+      font-size: 12.5px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .badge {
+      background: rgba(240, 20, 84, 0.14);
+      color: var(--accent-bright);
+      border: 0.5px solid rgba(240, 20, 84, 0.35);
+      border-radius: 20px;
+      padding: 4px 12px;
+      font-size: 12.5px;
+      font-weight: 600;
+    }
+
+    /* ── STAT CARDS ── */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+    }
+
+    .stat-label {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .stat-value {
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      margin-top: 4px;
+      color: var(--text);
+    }
+
+    .stat-value.green { color: var(--green); }
+    .stat-value.amber { color: var(--amber); }
+    .stat-value.accent { color: var(--accent-bright); }
+
+    .stat-sub {
+      font-size: 11.5px;
+      color: var(--text-dim);
+      margin-top: 3px;
+    }
+
+    /* ── CONTENT ROW ── */
+    .content-row {
+      display: grid;
+      grid-template-columns: 1fr 240px;
+      gap: 16px;
+      flex: 1;
+      min-height: 0;
+    }
+
+    /* ── HABITS LIST ── */
+    .habits-panel {
+      background: var(--surface);
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .panel-header {
+      padding: 14px 16px;
+      border-bottom: 0.5px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .panel-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .panel-hint {
+      font-size: 11.5px;
+      color: var(--text-dim);
+    }
+
+    .habits-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 6px 0;
+    }
+
+    .habits-list::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .habits-list::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .habits-list::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 4px;
+    }
+
+    .habit-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 14px;
+      border: 0.5px solid transparent;
+      border-left: none;
+      border-right: none;
+      cursor: default;
+      transition: background 0.12s, border-color 0.12s;
+    }
+
+    .habit-row:hover {
+      border-color: var(--border-hover);
+      background: rgba(240, 20, 84, 0.05);
+    }
+
+    .habit-row.completed {
+      background: var(--completed-bg);
+    }
+
+    .habit-row.completed:hover {
+      background: rgba(15, 17, 32, 0.85);
+    }
+
+    .drag-handle {
+      color: var(--text-dim);
+      cursor: grab;
+      font-size: 12px;
+      line-height: 1;
+      letter-spacing: 1px;
+      flex-shrink: 0;
+      user-select: none;
+    }
+
+    .checkbox {
+      width: 18px;
+      height: 18px;
+      border-radius: 4px;
+      border: 1.5px solid var(--border-hover);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: border-color 0.15s;
+    }
+
+    .checkbox.checked {
+      background: var(--green);
+      border-color: var(--green);
+    }
+
+    .checkbox.checked::after {
+      content: '';
+      display: block;
+      width: 5px;
+      height: 9px;
+      border: 2px solid #fff;
+      border-top: none;
+      border-left: none;
+      transform: rotate(45deg) translate(-1px, -1px);
+    }
+
+    .habit-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .habit-name {
+      font-size: 13.5px;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      color: var(--text);
+    }
+
+    .habit-name.strikethrough {
+      text-decoration: line-through;
+      color: var(--text-muted);
+    }
+
+    .habit-freq {
+      font-size: 11.5px;
+      color: var(--text-dim);
+      margin-top: 1px;
+    }
+
+    .streak-pill {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      background: rgba(245, 166, 35, 0.1);
+      border: 0.5px solid rgba(245, 166, 35, 0.22);
+      border-radius: 20px;
+      padding: 2px 8px;
+      font-size: 11.5px;
+      font-weight: 600;
+      color: var(--amber);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .streak-pill.dim {
+      background: rgba(37, 40, 64, 0.6);
+      border-color: var(--border);
+      color: var(--text-dim);
+    }
+
+    .skip-btn {
+      font-size: 11.5px;
+      font-weight: 500;
+      color: var(--text-dim);
+      background: none;
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 3px 8px;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: color 0.15s, border-color 0.15s;
+      font-family: inherit;
+    }
+
+    .skip-btn:hover {
+      color: var(--text-muted);
+      border-color: var(--border-hover);
+    }
+
+    /* ── ADD HABIT BUTTON ── */
+    .add-habit-btn {
+      margin: 8px 14px;
+      padding: 9px;
+      border: 1px dashed var(--border);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      color: var(--text-dim);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+      font-family: inherit;
+      background: none;
+      width: calc(100% - 28px);
+    }
+
+    .add-habit-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent-bright);
+    }
+
+    /* ── CHART PANEL ── */
+    .chart-panel {
+      background: var(--surface);
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius);
+      display: flex;
+      flex-direction: column;
+      padding: 14px 16px;
+      gap: 12px;
+    }
+
+    .chart-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .chart-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      min-height: 0;
+    }
+
+    .bars-container {
+      display: flex;
+      align-items: flex-end;
+      gap: 6px;
+      height: 120px;
+    }
+
+    .bar-col {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      height: 100%;
+      justify-content: flex-end;
+      gap: 6px;
+    }
+
+    .bar {
+      width: 100%;
+      border-radius: 4px 4px 0 0;
+      background: var(--accent-dark);
+      transition: background 0.15s;
+      min-height: 4px;
+    }
+
+    .bar.today {
+      background: var(--accent);
+    }
+
+    .bar-col:hover .bar {
+      background: #c0305a;
+    }
+
+    .bar-col:hover .bar.today {
+      background: var(--accent-bright);
+    }
+
+    .bar-label {
+      font-size: 10.5px;
+      color: var(--text-dim);
+      font-weight: 500;
+    }
+
+    .bar-label.today {
+      color: var(--accent-bright);
+    }
+
+    .bar-pct {
+      font-size: 10px;
+      color: var(--text-dim);
+      margin-bottom: 4px;
+    }
+
+    .bar-pct.today {
+      color: var(--accent);
+    }
+
+    .chart-legend {
+      display: flex;
+      gap: 14px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      color: var(--text-dim);
+    }
+
+    .legend-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 2px;
+    }
+
+    .legend-dot.accent { background: var(--accent); }
+    .legend-dot.accent-dark { background: var(--accent-dark); }
+
+    /* divider in habits */
+    .list-divider {
+      height: 0.5px;
+      background: var(--border);
+      margin: 4px 14px;
+    }
+  </style>
+</head>
+<body>
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-text">Habit<span>OS</span></div>
+      <div class="logo-sub">Personal tracker</div>
+    </div>
+
+    <nav class="nav">
+      <a class="nav-item active" href="index.html">
+        <span class="nav-icon">◈</span>
+        Today
+      </a>
+      <a class="nav-item" href="habits.html">
+        <span class="nav-icon">≡</span>
+        Habits
+      </a>
+      <a class="nav-item" href="stats.html">
+        <span class="nav-icon">↗</span>
+        Stats
+      </a>
+      <a class="nav-item" href="settings.html">
+        <span class="nav-icon">⚙</span>
+        Settings
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-pill">
+        <div class="avatar">DG</div>
+        <div class="user-name">Diego G.</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- HEADER -->
+    <div class="header">
+      <div class="header-left">
+        <h1>Hoy</h1>
+        <div class="date">Sábado, 3 de mayo de 2026</div>
+      </div>
+      <div class="badge">4 / 6 completados hoy</div>
+    </div>
+
+    <!-- STATS -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-label">Completados hoy</div>
+        <div class="stat-value green">4 <span style="font-size:14px;font-weight:500;color:var(--text-muted)">de 6</span></div>
+        <div class="stat-sub">2 hábitos restantes</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Racha más larga</div>
+        <div class="stat-value amber">12 <span style="font-size:14px;font-weight:500;color:var(--text-muted)">días</span></div>
+        <div class="stat-sub">Meditación diaria</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Completion rate</div>
+        <div class="stat-value accent">74<span style="font-size:14px;font-weight:500;color:var(--text-muted)">%</span></div>
+        <div class="stat-sub">Esta semana</div>
+      </div>
+    </div>
+
+    <!-- CONTENT ROW -->
+    <div class="content-row">
+
+      <!-- HABITS PANEL -->
+      <div class="habits-panel">
+        <div class="panel-header">
+          <span class="panel-title">Hábitos del día</span>
+          <span class="panel-hint">arrastra para reordenar</span>
+        </div>
+
+        <div class="habits-list">
+
+          <!-- COMPLETED -->
+          <div class="habit-row completed">
+            <span class="drag-handle">⠿</span>
+            <div class="checkbox checked"></div>
+            <div class="habit-info">
+              <div class="habit-name strikethrough">Meditación diaria</div>
+              <div class="habit-freq">Todos los días · mañana</div>
+            </div>
+            <div class="streak-pill">🔥 12</div>
+            <button class="skip-btn">skip</button>
+          </div>
+
+          <div class="habit-row completed">
+            <span class="drag-handle">⠿</span>
+            <div class="checkbox checked"></div>
+            <div class="habit-info">
+              <div class="habit-name strikethrough">Ejercicio 30 min</div>
+              <div class="habit-freq">Lun · Mié · Vie · Sáb</div>
+            </div>
+            <div class="streak-pill">🔥 8</div>
+            <button class="skip-btn">skip</button>
+          </div>
+
+          <div class="habit-row completed">
+            <span class="drag-handle">⠿</span>
+            <div class="checkbox checked"></div>
+            <div class="habit-info">
+              <div class="habit-name strikethrough">Leer 20 páginas</div>
+              <div class="habit-freq">Todos los días · noche</div>
+            </div>
+            <div class="streak-pill">🔥 5</div>
+            <button class="skip-btn">skip</button>
+          </div>
+
+          <div class="list-divider"></div>
+
+          <!-- PENDING -->
+          <div class="habit-row">
+            <span class="drag-handle">⠿</span>
+            <div class="checkbox"></div>
+            <div class="habit-info">
+              <div class="habit-name">Journaling</div>
+              <div class="habit-freq">Todos los días · tarde</div>
+            </div>
+            <div class="streak-pill dim">— 3</div>
+            <button class="skip-btn">skip</button>
+          </div>
+
+          <div class="habit-row">
+            <span class="drag-handle">⠿</span>
+            <div class="checkbox"></div>
+            <div class="habit-info">
+              <div class="habit-name">Agua · 2 litros</div>
+              <div class="habit-freq">Todos los días</div>
+            </div>
+            <div class="streak-pill dim">— 0</div>
+            <button class="skip-btn">skip</button>
+          </div>
+
+          <div class="habit-row">
+            <span class="drag-handle">⠿</span>
+            <div class="checkbox"></div>
+            <div class="habit-info">
+              <div class="habit-name">Sin redes sociales</div>
+              <div class="habit-freq">Lun a Vie</div>
+            </div>
+            <div class="streak-pill dim">— 1</div>
+            <button class="skip-btn">skip</button>
+          </div>
+
+        </div>
+
+        <button class="add-habit-btn">＋ Agregar hábito</button>
+      </div>
+
+      <!-- CHART PANEL -->
+      <div class="chart-panel">
+        <div class="chart-title">Últimos 7 días</div>
+
+        <div class="chart-area">
+          <div class="bars-container">
+
+            <div class="bar-col">
+              <div class="bar-pct">50%</div>
+              <div class="bar" style="height: 50%"></div>
+              <div class="bar-label">D</div>
+            </div>
+
+            <div class="bar-col">
+              <div class="bar-pct">83%</div>
+              <div class="bar" style="height: 83%"></div>
+              <div class="bar-label">L</div>
+            </div>
+
+            <div class="bar-col">
+              <div class="bar-pct">67%</div>
+              <div class="bar" style="height: 67%"></div>
+              <div class="bar-label">M</div>
+            </div>
+
+            <div class="bar-col">
+              <div class="bar-pct">100%</div>
+              <div class="bar" style="height: 100%"></div>
+              <div class="bar-label">X</div>
+            </div>
+
+            <div class="bar-col">
+              <div class="bar-pct">83%</div>
+              <div class="bar" style="height: 83%"></div>
+              <div class="bar-label">J</div>
+            </div>
+
+            <div class="bar-col">
+              <div class="bar-pct">67%</div>
+              <div class="bar" style="height: 67%"></div>
+              <div class="bar-label">V</div>
+            </div>
+
+            <div class="bar-col">
+              <div class="bar-pct today">67%</div>
+              <div class="bar today" style="height: 67%"></div>
+              <div class="bar-label today">S ·</div>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="chart-legend">
+          <div class="legend-item">
+            <div class="legend-dot accent"></div>
+            Hoy
+          </div>
+          <div class="legend-item">
+            <div class="legend-dot accent-dark"></div>
+            Días anteriores
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HabitOS · Auth</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d0f1e;
+      --surface: #1c1f35;
+      --surface-glass: rgba(28, 31, 53, 0.75);
+      --border: #252840;
+      --border-hover: #3a3d58;
+      --accent: #f01454;
+      --accent-dark: #a00d38;
+      --accent-bright: #f5527a;
+      --green: #2dd4a0;
+      --amber: #f5a623;
+      --text: #c0c4e2;
+      --text-muted: #7a7e9a;
+      --text-dim: #40445e;
+      --radius: 12px;
+      --radius-sm: 7px;
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, sans-serif;
+      font-size: 14px;
+      line-height: 1.5;
+      overflow: hidden;
+    }
+
+    /* ── BACKGROUND ── */
+    .bg {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    /* dot grid */
+    .bg::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: radial-gradient(circle, #2a2d4a 1px, transparent 1px);
+      background-size: 28px 28px;
+      opacity: 0.6;
+    }
+
+    /* diagonal lines overlay */
+    .bg::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: repeating-linear-gradient(
+        -45deg,
+        transparent,
+        transparent 60px,
+        rgba(240, 20, 84, 0.015) 60px,
+        rgba(240, 20, 84, 0.015) 61px
+      );
+    }
+
+    /* glow orbs */
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(90px);
+      pointer-events: none;
+    }
+
+    .orb-1 {
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(240, 20, 84, 0.18) 0%, transparent 70%);
+      bottom: -200px;
+      left: -100px;
+    }
+
+    .orb-2 {
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(45, 212, 160, 0.08) 0%, transparent 70%);
+      top: -100px;
+      right: 200px;
+    }
+
+    .orb-3 {
+      width: 300px;
+      height: 300px;
+      background: radial-gradient(circle, rgba(240, 20, 84, 0.1) 0%, transparent 70%);
+      top: 30%;
+      left: 30%;
+    }
+
+    /* decorative ring */
+    .ring {
+      position: absolute;
+      border-radius: 50%;
+      border: 0.5px solid rgba(240, 20, 84, 0.12);
+      pointer-events: none;
+    }
+
+    .ring-1 { width: 700px; height: 700px; bottom: -350px; left: -200px; }
+    .ring-2 { width: 500px; height: 500px; bottom: -250px; left: -100px; border-color: rgba(240, 20, 84, 0.07); }
+    .ring-3 { width: 900px; height: 900px; top: -500px; right: -300px; border-color: rgba(255,255,255,0.03); }
+
+    /* ── PAGE ── */
+    .page {
+      position: relative;
+      z-index: 1;
+      height: 100vh;
+      display: grid;
+      grid-template-columns: 1fr 460px;
+      align-items: stretch;
+    }
+
+    /* ── LEFT ── */
+    .left {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 40px 56px;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo-mark {
+      width: 34px;
+      height: 34px;
+      background: var(--accent);
+      border-radius: 9px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 17px;
+      color: #fff;
+      flex-shrink: 0;
+    }
+
+    .logo-text {
+      font-size: 19px;
+      font-weight: 700;
+      letter-spacing: -0.4px;
+    }
+
+    .logo-text span { color: var(--accent); }
+
+    /* big hero text */
+    .hero {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 28px;
+    }
+
+    .hero-eyebrow {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--accent-bright);
+    }
+
+    .eyebrow-line {
+      width: 28px;
+      height: 1.5px;
+      background: var(--accent);
+    }
+
+    .hero-heading {
+      font-size: clamp(38px, 4vw, 54px);
+      font-weight: 800;
+      letter-spacing: -1.5px;
+      line-height: 1.1;
+      color: var(--text);
+    }
+
+    .hero-heading .accent-word {
+      color: var(--accent);
+      position: relative;
+      display: inline-block;
+    }
+
+    /* underline accent */
+    .hero-heading .accent-word::after {
+      content: '';
+      position: absolute;
+      bottom: 2px;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--accent);
+      border-radius: 2px;
+      opacity: 0.4;
+    }
+
+    .hero-sub {
+      font-size: 15px;
+      color: var(--text-muted);
+      line-height: 1.7;
+      max-width: 380px;
+    }
+
+    /* stat pills row */
+    .stat-pills {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .stat-pill {
+      background: rgba(255,255,255,0.04);
+      border: 0.5px solid var(--border-hover);
+      border-radius: 30px;
+      padding: 7px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+    }
+
+    .stat-pill-val {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.5px;
+      line-height: 1;
+    }
+
+    .stat-pill-val .unit { font-size: 12px; font-weight: 500; color: var(--text-muted); }
+    .stat-pill-label { font-size: 11px; color: var(--text-dim); }
+
+    /* testimonial */
+    .testimonial {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding: 18px 20px;
+      background: rgba(255,255,255,0.03);
+      border: 0.5px solid var(--border);
+      border-left: 2px solid var(--accent);
+      border-radius: var(--radius-sm);
+      max-width: 400px;
+    }
+
+    .testimonial-text {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.6;
+      font-style: italic;
+    }
+
+    .testimonial-author {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .testimonial-avatar {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: var(--accent-dark);
+      font-size: 10px;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .testimonial-name { font-size: 12px; color: var(--text-dim); font-weight: 500; }
+
+    /* ── RIGHT ── */
+    .right {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 32px;
+      border-left: 0.5px solid rgba(255,255,255,0.04);
+      background: rgba(13, 15, 30, 0.5);
+      backdrop-filter: blur(24px);
+    }
+
+    .auth-card {
+      width: 100%;
+      max-width: 360px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    /* ── TABS ── */
+    .tabs {
+      display: flex;
+      background: rgba(255,255,255,0.04);
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 3px;
+    }
+
+    .tab {
+      flex: 1;
+      text-align: center;
+      padding: 7px;
+      border-radius: 9px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.18s;
+      user-select: none;
+    }
+
+    .tab.active {
+      background: var(--surface);
+      color: var(--text);
+      border: 0.5px solid var(--border-hover);
+    }
+
+    .tab:hover:not(.active) { color: var(--text); }
+
+    /* ── PANEL ── */
+    .panel { display: none; flex-direction: column; gap: 20px; }
+    .panel.active { display: flex; }
+
+    .panel-head { display: flex; flex-direction: column; gap: 4px; }
+
+    .panel-title {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.4px;
+      color: var(--text);
+    }
+
+    .panel-sub { font-size: 12.5px; color: var(--text-muted); }
+
+    /* ── FORM ── */
+    .form { display: flex; flex-direction: column; gap: 12px; }
+
+    .field { display: flex; flex-direction: column; gap: 5px; }
+
+    label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      letter-spacing: 0.2px;
+    }
+
+    .input-wrap { position: relative; }
+
+    input {
+      width: 100%;
+      background: rgba(255,255,255,0.04);
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 9px 12px;
+      font-size: 13.5px;
+      color: var(--text);
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.15s, background 0.15s;
+    }
+
+    input::placeholder { color: var(--text-dim); }
+    input:focus { border-color: var(--accent); background: rgba(240, 20, 84, 0.04); }
+
+    .input-wrap input { padding-right: 36px; }
+
+    .eye-btn {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-dim);
+      font-size: 12px;
+      cursor: pointer;
+      user-select: none;
+      transition: color 0.15s;
+    }
+
+    .eye-btn:hover { color: var(--text-muted); }
+
+    /* strength bar */
+    .strength-bar { display: flex; gap: 3px; margin-top: 5px; }
+    .seg { flex: 1; height: 3px; border-radius: 2px; background: var(--border); transition: background 0.2s; }
+    .seg.w { background: var(--accent); }
+    .seg.m { background: var(--amber); }
+    .seg.s { background: var(--green); }
+    .strength-txt { font-size: 10.5px; margin-top: 3px; }
+    .strength-txt.w { color: var(--accent-bright); }
+    .strength-txt.m { color: var(--amber); }
+    .strength-txt.s { color: var(--green); }
+
+    /* extras row */
+    .extras {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .check-row {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .box {
+      width: 14px;
+      height: 14px;
+      border-radius: 3px;
+      border: 1.5px solid var(--border-hover);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.15s;
+    }
+
+    .box.on { background: var(--accent); border-color: var(--accent); }
+
+    .box.on::after {
+      content: '';
+      width: 3px;
+      height: 6px;
+      border: 1.5px solid #fff;
+      border-top: none;
+      border-left: none;
+      transform: rotate(45deg) translate(-0.5px, -1px);
+      display: block;
+    }
+
+    .check-label { font-size: 12px; color: var(--text-muted); }
+
+    .link { font-size: 12px; color: var(--accent-bright); cursor: pointer; transition: color 0.15s; }
+    .link:hover { color: var(--accent); }
+
+    /* ── SUBMIT ── */
+    .btn {
+      width: 100%;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-sm);
+      padding: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+      letter-spacing: 0.2px;
+      transition: background 0.15s, transform 0.1s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn:hover { background: var(--accent-bright); }
+    .btn:active { transform: scale(0.99); }
+
+    /* ── DIVIDER ── */
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 11.5px;
+      color: var(--text-dim);
+    }
+
+    .divider::before, .divider::after {
+      content: '';
+      flex: 1;
+      height: 0.5px;
+      background: var(--border);
+    }
+
+    /* ── OAUTH ── */
+    .oauth { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+    .oauth-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      padding: 8px;
+      background: rgba(255,255,255,0.03);
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text-muted);
+      font-size: 12.5px;
+      font-weight: 500;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.15s;
+    }
+
+    .oauth-btn:hover { border-color: var(--border-hover); color: var(--text); background: rgba(255,255,255,0.05); }
+
+    .oauth-icon { font-size: 14px; }
+
+    /* ── FOOTER ── */
+    .card-footer {
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .card-footer .link { font-weight: 600; }
+
+    /* ── TERMS NOTE ── */
+    .terms-note {
+      text-align: center;
+      font-size: 11px;
+      color: var(--text-dim);
+      line-height: 1.6;
+    }
+
+    .terms-note .link { font-size: 11px; }
+  </style>
+</head>
+<body>
+
+<!-- BACKGROUND -->
+<div class="bg">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+  <div class="ring ring-1"></div>
+  <div class="ring ring-2"></div>
+  <div class="ring ring-3"></div>
+</div>
+
+<div class="page">
+
+  <!-- LEFT -->
+  <div class="left">
+    <div class="logo">
+      <div class="logo-mark">◈</div>
+      <div class="logo-text">Habit<span>OS</span></div>
+    </div>
+
+    <div class="hero">
+      <div class="hero-eyebrow">
+        <div class="eyebrow-line"></div>
+        Personal habit tracker
+      </div>
+
+      <h1 class="hero-heading">
+        Construye hábitos<br>que <span class="accent-word">duran</span>
+      </h1>
+
+      <p class="hero-sub">
+        Seguimiento diario, rachas, estadísticas y recordatorios por Telegram. Sin excusas, sin apps de más.
+      </p>
+
+      <div class="stat-pills">
+        <div class="stat-pill">
+          <div class="stat-pill-val">12<span class="unit">d</span></div>
+          <div class="stat-pill-label">Racha activa</div>
+        </div>
+        <div class="stat-pill">
+          <div class="stat-pill-val">74<span class="unit">%</span></div>
+          <div class="stat-pill-label">Completion semanal</div>
+        </div>
+        <div class="stat-pill">
+          <div class="stat-pill-val">6</div>
+          <div class="stat-pill-label">Hábitos activos</div>
+        </div>
+      </div>
+
+      <div class="testimonial">
+        <div class="testimonial-text">
+          "Llevo 3 meses usando HabitOS y mis rachas nunca habían sido tan largas. El recordatorio de Telegram es un game-changer."
+        </div>
+        <div class="testimonial-author">
+          <div class="testimonial-avatar">AL</div>
+          <div class="testimonial-name">Ana L. · usuario desde enero</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT -->
+  <div class="right">
+    <div class="auth-card">
+
+      <div class="tabs">
+        <div class="tab active" id="tab-login" onclick="switchTab('login')">Iniciar sesión</div>
+        <div class="tab" id="tab-register" onclick="switchTab('register')">Crear cuenta</div>
+      </div>
+
+      <!-- LOGIN -->
+      <div class="panel active" id="panel-login">
+        <div class="panel-head">
+          <div class="panel-title">Bienvenido de vuelta</div>
+          <div class="panel-sub">Ingresa tus credenciales para continuar</div>
+        </div>
+
+        <div class="form">
+          <div class="field">
+            <label>Correo electrónico</label>
+            <input type="email" placeholder="diego@email.com" value="diego@email.com">
+          </div>
+          <div class="field">
+            <label>Contraseña</label>
+            <div class="input-wrap">
+              <input type="password" id="lpass" placeholder="••••••••" value="••••••••">
+              <span class="eye-btn" onclick="togglePass('lpass')">👁</span>
+            </div>
+          </div>
+          <div class="extras">
+            <div class="check-row" onclick="toggleCheck(this)">
+              <div class="box on"></div>
+              <span class="check-label">Recordarme</span>
+            </div>
+            <span class="link">¿Olvidaste tu contraseña?</span>
+          </div>
+          <button class="btn">Iniciar sesión</button>
+        </div>
+
+        <div class="divider">o continúa con</div>
+
+        <div class="oauth">
+          <button class="oauth-btn"><span class="oauth-icon">G</span> Google</button>
+          <button class="oauth-btn"><span class="oauth-icon">⌘</span> GitHub</button>
+        </div>
+
+        <div class="card-footer">
+          ¿No tienes cuenta? <span class="link" onclick="switchTab('register')">Regístrate</span>
+        </div>
+      </div>
+
+      <!-- REGISTER -->
+      <div class="panel" id="panel-register">
+        <div class="panel-head">
+          <div class="panel-title">Crea tu cuenta</div>
+          <div class="panel-sub">Empieza a construir mejores hábitos hoy</div>
+        </div>
+
+        <div class="form">
+          <div class="field">
+            <label>Nombre completo</label>
+            <input type="text" placeholder="Diego García">
+          </div>
+          <div class="field">
+            <label>Correo electrónico</label>
+            <input type="email" placeholder="diego@email.com">
+          </div>
+          <div class="field">
+            <label>Contraseña</label>
+            <div class="input-wrap">
+              <input type="password" id="rpass" placeholder="Mínimo 8 caracteres" oninput="checkStrength(this)">
+              <span class="eye-btn" onclick="togglePass('rpass')">👁</span>
+            </div>
+            <div class="strength-bar">
+              <div class="seg" id="s1"></div>
+              <div class="seg" id="s2"></div>
+              <div class="seg" id="s3"></div>
+              <div class="seg" id="s4"></div>
+            </div>
+            <div class="strength-txt" id="stxt"></div>
+          </div>
+          <div class="field">
+            <label>Confirmar contraseña</label>
+            <div class="input-wrap">
+              <input type="password" id="rpass2" placeholder="Repite tu contraseña">
+              <span class="eye-btn" onclick="togglePass('rpass2')">👁</span>
+            </div>
+          </div>
+          <div class="check-row" onclick="toggleCheck(this)">
+            <div class="box"></div>
+            <span class="check-label">Acepto los <span class="link">términos y condiciones</span></span>
+          </div>
+          <button class="btn">Crear cuenta</button>
+        </div>
+
+        <div class="card-footer">
+          ¿Ya tienes cuenta? <span class="link" onclick="switchTab('login')">Inicia sesión</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<script>
+  function switchTab(t) {
+    document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(el => el.classList.remove('active'));
+    document.getElementById('tab-' + t).classList.add('active');
+    document.getElementById('panel-' + t).classList.add('active');
+  }
+
+  function togglePass(id) {
+    const i = document.getElementById(id);
+    i.type = i.type === 'password' ? 'text' : 'password';
+  }
+
+  function toggleCheck(row) {
+    row.querySelector('.box').classList.toggle('on');
+  }
+
+  function checkStrength(input) {
+    const v = input.value;
+    const segs = ['s1','s2','s3','s4'].map(id => document.getElementById(id));
+    const txt = document.getElementById('stxt');
+    segs.forEach(s => s.className = 'seg');
+    txt.textContent = '';
+    if (!v) return;
+    let score = 0;
+    if (v.length >= 8) score++;
+    if (/[A-Z]/.test(v)) score++;
+    if (/[0-9]/.test(v)) score++;
+    if (/[^A-Za-z0-9]/.test(v)) score++;
+    const lvl = score <= 1 ? 'w' : score <= 2 ? 'm' : 's';
+    const fill = { w: 1, m: 2, s: 4 };
+    const labels = { w: 'Débil', m: 'Regular', s: 'Fuerte' };
+    for (let i = 0; i < fill[lvl]; i++) segs[i].classList.add(lvl);
+    txt.className = 'strength-txt ' + lvl;
+    txt.textContent = labels[lvl];
+  }
+</script>
+</body>
+</html>

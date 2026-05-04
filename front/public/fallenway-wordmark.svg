@@ -1,0 +1,17 @@
+<svg width="380" height="90" viewBox="0 0 380 90" xmlns="http://www.w3.org/2000/svg">
+  <text x="190" y="62"
+        text-anchor="middle"
+        font-family="'Inter', 'DM Sans', sans-serif"
+        font-size="58"
+        font-weight="600"
+        letter-spacing="-2"
+        fill="#c0c4e2">Fallen<tspan fill="#f01454">Way</tspan></text>
+
+  <text x="190" y="82"
+        text-anchor="middle"
+        font-family="'Inter', 'DM Sans', sans-serif"
+        font-size="11"
+        font-weight="400"
+        letter-spacing="5"
+        fill="#7a7e9a">HABIT TRACKER</text>
+</svg>

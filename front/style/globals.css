@@ -1,0 +1,138 @@
+@import "tailwindcss";
+
+/* ── Design tokens ── */
+:root {
+  --bg:           #13162a;
+  --surface:      #1c1f35;
+  --border:       #252840;
+  --border-hover: #333650;
+
+  --accent:        #f01454;
+  --accent-dark:   #a00d38;
+  --accent-bright: #f5527a;
+
+  --green:     #2dd4a0;
+  --green-dim: #0d3d2e;
+  --amber:     #f5a623;
+
+  --text:       #c0c4e2;
+  --text-muted: #7a7e9a;
+  --text-dim:   #40445e;
+
+  --completed-bg: #0f1120;
+  --nav-hover:    #1a1d33;
+
+  --radius:    10px;
+  --radius-sm: 6px;
+}
+
+/* ── Tailwind v4 theme registration ── */
+@theme inline {
+  /* backgrounds / surfaces */
+  --color-bg:           var(--bg);
+  --color-surface:      var(--surface);
+  --color-completed-bg: var(--completed-bg);
+  --color-nav-hover:    var(--nav-hover);
+
+  /* borders */
+  --color-border:       var(--border);
+  --color-border-hover: var(--border-hover);
+
+  /* accent */
+  --color-accent:        var(--accent);
+  --color-accent-dark:   var(--accent-dark);
+  --color-accent-bright: var(--accent-bright);
+
+  /* semantic */
+  --color-green:     var(--green);
+  --color-green-dim: var(--green-dim);
+  --color-amber:     var(--amber);
+
+  /* text */
+  --color-text:       var(--text);
+  --color-text-muted: var(--text-muted);
+  --color-text-dim:   var(--text-dim);
+
+  /* radius */
+  --radius-app:    var(--radius);
+  --radius-app-sm: var(--radius-sm);
+
+  /* fonts */
+  --font-sans: var(--font-inter), var(--font-dm-sans), system-ui, sans-serif;
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', 'DM Sans', var(--font-sans);
+}
+
+/* ── App background layer ── */
+.app-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  /* dot grid */
+  background-image: radial-gradient(circle, #2a2d4a 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+.app-bg__orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(100px);
+}
+
+.app-bg__orb--1 {
+  width: 600px;
+  height: 600px;
+  background: rgba(240, 20, 84, 0.25);
+  bottom: -200px;
+  left: -100px;
+}
+
+.app-bg__orb--2 {
+  width: 400px;
+  height: 400px;
+  background: rgba(45, 212, 160, 0.1);
+  top: -80px;
+  right: 10%;
+}
+
+.app-bg__orb--3 {
+  width: 300px;
+  height: 300px;
+  background: rgba(240, 20, 84, 0.15);
+  top: 35%;
+  left: 45%;
+}
+
+.app-bg__ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid rgba(240, 20, 84, 0.12);
+}
+
+.app-bg__ring--1 {
+  width: 700px;
+  height: 700px;
+  bottom: -350px;
+  left: -200px;
+}
+
+.app-bg__ring--2 {
+  width: 500px;
+  height: 500px;
+  border-color: rgba(240, 20, 84, 0.07);
+  bottom: -250px;
+  left: -100px;
+}
+
+.app-bg__ring--3 {
+  width: 900px;
+  height: 900px;
+  border-color: rgba(255, 255, 255, 0.03);
+  top: -500px;
+  right: -280px;
+}

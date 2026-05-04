@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HabitOS · Hábitos</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #13162a;
+      --surface: #1c1f35;
+      --border: #252840;
+      --border-hover: #333650;
+      --accent: #f01454;
+      --accent-dark: #a00d38;
+      --accent-bright: #f5527a;
+      --green: #2dd4a0;
+      --green-dim: #0d3d2e;
+      --amber: #f5a623;
+      --text: #c0c4e2;
+      --text-muted: #7a7e9a;
+      --text-dim: #40445e;
+      --completed-bg: #0f1120;
+      --nav-hover: #1a1d33;
+      --radius: 10px;
+      --radius-sm: 6px;
+    }
+
+    html, body { height: 100%; background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, sans-serif; font-size: 14px; line-height: 1.5; }
+
+    .layout { display: flex; height: 100vh; overflow: hidden; }
+
+    /* ── SIDEBAR ── */
+    .sidebar { width: 200px; flex-shrink: 0; background: var(--surface); border-right: 0.5px solid var(--border); display: flex; flex-direction: column; padding: 20px 0; }
+    .sidebar-logo { padding: 0 18px 24px; border-bottom: 0.5px solid var(--border); margin-bottom: 12px; }
+    .logo-text { font-size: 17px; font-weight: 700; letter-spacing: -0.3px; color: var(--text); }
+    .logo-text span { color: var(--accent); }
+    .logo-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+    .nav { display: flex; flex-direction: column; gap: 2px; padding: 0 10px; }
+    .nav-item { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: var(--radius-sm); color: var(--text-muted); cursor: pointer; font-size: 13.5px; font-weight: 500; transition: background 0.15s, color 0.15s; user-select: none; text-decoration: none; }
+    .nav-item:hover { background: var(--nav-hover); color: var(--text); }
+    .nav-item.active { background: rgba(240, 20, 84, 0.15); color: var(--accent-bright); }
+    .nav-icon { width: 16px; text-align: center; font-size: 14px; opacity: 0.9; }
+    .sidebar-footer { margin-top: auto; padding: 16px 18px 0; border-top: 0.5px solid var(--border); }
+    .user-pill { display: flex; align-items: center; gap: 8px; }
+    .avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--accent-dark); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #fff; flex-shrink: 0; }
+    .user-name { font-size: 12.5px; font-weight: 500; color: var(--text-muted); }
+
+    /* ── MAIN ── */
+    .main { flex: 1; overflow: hidden; display: flex; flex-direction: column; padding: 24px 28px; gap: 18px; }
+
+    /* ── HEADER ── */
+    .header { display: flex; align-items: center; justify-content: space-between; }
+    .header-left h1 { font-size: 20px; font-weight: 700; letter-spacing: -0.4px; }
+    .header-left .sub { font-size: 12.5px; color: var(--text-muted); margin-top: 2px; }
+    .btn-new { display: flex; align-items: center; gap: 6px; background: var(--accent); color: #fff; border: none; border-radius: var(--radius-sm); padding: 7px 14px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; transition: background 0.15s; }
+    .btn-new:hover { background: var(--accent-bright); }
+
+    /* ── STAT CARDS ── */
+    .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .stat-card { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 14px 16px; }
+    .stat-label { font-size: 11.5px; color: var(--text-muted); font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
+    .stat-value { font-size: 24px; font-weight: 700; letter-spacing: -0.5px; margin-top: 4px; color: var(--text); }
+    .stat-value.green { color: var(--green); }
+    .stat-value.amber { color: var(--amber); }
+    .stat-value.accent { color: var(--accent-bright); }
+    .stat-sub { font-size: 11.5px; color: var(--text-dim); margin-top: 3px; }
+
+    /* ── FILTER TABS ── */
+    .filter-row { display: flex; align-items: center; gap: 4px; }
+    .filter-tab { padding: 5px 12px; border-radius: 20px; font-size: 12.5px; font-weight: 500; color: var(--text-muted); cursor: pointer; border: 0.5px solid transparent; transition: all 0.15s; user-select: none; }
+    .filter-tab:hover { background: var(--nav-hover); color: var(--text); }
+    .filter-tab.active { background: rgba(240, 20, 84, 0.15); color: var(--accent-bright); border-color: rgba(240, 20, 84, 0.3); }
+    .filter-tab .count { font-size: 11px; color: var(--text-dim); margin-left: 4px; }
+    .filter-tab.active .count { color: var(--accent-bright); opacity: 0.7; }
+    .filter-spacer { flex: 1; }
+    .sort-btn { font-size: 12px; color: var(--text-dim); cursor: pointer; display: flex; align-items: center; gap: 5px; padding: 5px 10px; border-radius: var(--radius-sm); border: 0.5px solid var(--border); transition: color 0.15s, border-color 0.15s; }
+    .sort-btn:hover { color: var(--text-muted); border-color: var(--border-hover); }
+
+    /* ── HABITS TABLE ── */
+    .habits-table { flex: 1; background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); display: flex; flex-direction: column; overflow: hidden; min-height: 0; }
+    .table-head { display: grid; grid-template-columns: 20px 1fr 100px 80px 120px 90px 80px; gap: 12px; padding: 10px 16px; border-bottom: 0.5px solid var(--border); align-items: center; }
+    .th { font-size: 11px; font-weight: 600; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px; }
+    .th.right { text-align: right; }
+    .table-body { flex: 1; overflow-y: auto; }
+    .table-body::-webkit-scrollbar { width: 4px; }
+    .table-body::-webkit-scrollbar-track { background: transparent; }
+    .table-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+    .habit-row { display: grid; grid-template-columns: 20px 1fr 100px 80px 120px 90px 80px; gap: 12px; padding: 11px 16px; border-bottom: 0.5px solid var(--border); align-items: center; transition: background 0.12s; cursor: default; }
+    .habit-row:last-child { border-bottom: none; }
+    .habit-row:hover { background: rgba(240, 20, 84, 0.04); }
+
+    .drag-handle { color: var(--text-dim); cursor: grab; font-size: 12px; user-select: none; }
+
+    .habit-main { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+    .habit-name-row { display: flex; align-items: center; gap: 8px; }
+    .habit-name { font-size: 13.5px; font-weight: 500; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .cat-tag { font-size: 10.5px; font-weight: 600; padding: 1px 7px; border-radius: 10px; white-space: nowrap; flex-shrink: 0; }
+    .cat-tag.salud    { background: rgba(45, 212, 160, 0.12); color: var(--green); border: 0.5px solid rgba(45, 212, 160, 0.2); }
+    .cat-tag.mente    { background: rgba(240, 20, 84, 0.12); color: var(--accent-bright); border: 0.5px solid rgba(240, 20, 84, 0.2); }
+    .cat-tag.prod     { background: rgba(245, 166, 35, 0.12); color: var(--amber); border: 0.5px solid rgba(245, 166, 35, 0.2); }
+    .habit-freq { font-size: 11.5px; color: var(--text-dim); }
+
+    .streak-pill { display: inline-flex; align-items: center; gap: 4px; background: rgba(245, 166, 35, 0.1); border: 0.5px solid rgba(245, 166, 35, 0.22); border-radius: 20px; padding: 2px 8px; font-size: 11.5px; font-weight: 600; color: var(--amber); white-space: nowrap; }
+    .streak-pill.zero { background: rgba(37, 40, 64, 0.6); border-color: var(--border); color: var(--text-dim); }
+
+    .best-val { font-size: 13px; font-weight: 600; color: var(--text-muted); }
+    .best-unit { font-size: 11px; color: var(--text-dim); margin-left: 2px; }
+
+    /* week mini grid */
+    .week-grid { display: flex; gap: 3px; }
+    .week-day { width: 13px; height: 13px; border-radius: 3px; }
+    .week-day.done { background: var(--accent); }
+    .week-day.skip { background: rgba(245, 166, 35, 0.35); }
+    .week-day.miss { background: var(--border); }
+    .week-day.na   { background: var(--border); opacity: 0.3; }
+
+    /* rate bar */
+    .rate-col { display: flex; flex-direction: column; gap: 4px; }
+    .rate-bar-bg { height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+    .rate-bar-fill { height: 100%; border-radius: 2px; background: var(--accent); }
+    .rate-bar-fill.green { background: var(--green); }
+    .rate-val { font-size: 11px; color: var(--text-muted); font-weight: 600; }
+
+    /* actions */
+    .actions { display: flex; gap: 6px; justify-content: flex-end; opacity: 0; transition: opacity 0.15s; }
+    .habit-row:hover .actions { opacity: 1; }
+    .icon-btn { width: 26px; height: 26px; border-radius: var(--radius-sm); border: 0.5px solid var(--border); background: none; color: var(--text-dim); font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: color 0.15s, border-color 0.15s; }
+    .icon-btn:hover { color: var(--text); border-color: var(--border-hover); }
+    .icon-btn.danger:hover { color: var(--accent-bright); border-color: var(--accent); }
+
+    /* add row */
+    .add-row { padding: 10px 16px; border-top: 0.5px solid var(--border); }
+    .add-btn { display: flex; align-items: center; gap: 6px; color: var(--text-dim); font-size: 13px; font-weight: 500; cursor: pointer; padding: 7px 10px; border-radius: var(--radius-sm); border: 1px dashed var(--border); width: 100%; justify-content: center; background: none; font-family: inherit; transition: border-color 0.15s, color 0.15s; }
+    .add-btn:hover { border-color: var(--accent); color: var(--accent-bright); }
+
+    /* paused row */
+    .habit-row.paused { opacity: 0.5; }
+    .paused-badge { font-size: 10.5px; color: var(--text-dim); background: var(--border); border-radius: 10px; padding: 1px 7px; }
+  </style>
+</head>
+<body>
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-text">Habit<span>OS</span></div>
+      <div class="logo-sub">Personal tracker</div>
+    </div>
+    <nav class="nav">
+      <a class="nav-item" href="index.html"><span class="nav-icon">◈</span>Today</a>
+      <a class="nav-item active" href="habits.html"><span class="nav-icon">≡</span>Habits</a>
+      <a class="nav-item" href="stats.html"><span class="nav-icon">↗</span>Stats</a>
+      <a class="nav-item" href="settings.html"><span class="nav-icon">⚙</span>Settings</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-pill">
+        <div class="avatar">DG</div>
+        <div class="user-name">Diego G.</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- HEADER -->
+    <div class="header">
+      <div class="header-left">
+        <h1>Hábitos</h1>
+        <div class="sub">Gestiona y organiza tus hábitos</div>
+      </div>
+      <button class="btn-new">＋ Nuevo hábito</button>
+    </div>
+
+    <!-- STATS -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-label">Hábitos activos</div>
+        <div class="stat-value green">6</div>
+        <div class="stat-sub">1 archivado</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Racha promedio</div>
+        <div class="stat-value amber">6 <span style="font-size:14px;font-weight:500;color:var(--text-muted)">días</span></div>
+        <div class="stat-sub">Todos los hábitos</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Mejor mes</div>
+        <div class="stat-value accent">84<span style="font-size:14px;font-weight:500;color:var(--text-muted)">%</span></div>
+        <div class="stat-sub">Abril 2026</div>
+      </div>
+    </div>
+
+    <!-- FILTERS -->
+    <div class="filter-row">
+      <div class="filter-tab active">Todos <span class="count">6</span></div>
+      <div class="filter-tab">Activos <span class="count">5</span></div>
+      <div class="filter-tab">Pausados <span class="count">1</span></div>
+      <div class="filter-tab">Archivados <span class="count">1</span></div>
+      <div class="filter-spacer"></div>
+      <div class="sort-btn">↕ Ordenar por racha</div>
+    </div>
+
+    <!-- TABLE -->
+    <div class="habits-table">
+      <div class="table-head">
+        <div></div>
+        <div class="th">Hábito</div>
+        <div class="th">Racha actual</div>
+        <div class="th">Mejor</div>
+        <div class="th">Esta semana</div>
+        <div class="th right">Tasa mes</div>
+        <div class="th right">Acciones</div>
+      </div>
+
+      <div class="table-body">
+
+        <!-- 1 Meditación -->
+        <div class="habit-row">
+          <span class="drag-handle">⠿</span>
+          <div class="habit-main">
+            <div class="habit-name-row">
+              <span class="habit-name">Meditación diaria</span>
+              <span class="cat-tag mente">Mente</span>
+            </div>
+            <div class="habit-freq">Todos los días · mañana</div>
+          </div>
+          <div class="streak-pill">🔥 12</div>
+          <div class="best-val">21<span class="best-unit">d</span></div>
+          <div class="week-grid">
+            <div class="week-day done"></div>
+            <div class="week-day done"></div>
+            <div class="week-day done"></div>
+            <div class="week-day done"></div>
+            <div class="week-day done"></div>
+            <div class="week-day done"></div>
+            <div class="week-day done"></div>
+          </div>
+          <div class="rate-col">
+            <div class="rate-bar-bg"><div class="rate-bar-fill" style="width:87%"></div></div>
+            <div class="rate-val">87%</div>
+          </div>
+          <div class="actions">
+            <button class="icon-btn" title="Editar">✎</button>
+            <button class="icon-btn" title="Pausar">⏸</button>
+            <button class="icon-btn danger" title="Eliminar">✕</button>
+          </div>
+        </div>
+
+        <!-- 2 Ejercicio -->
+        <div class="habit-row">
+          <span class="drag-handle">⠿</span>
+          <div class="habit-main">
+            <div class="habit-name-row">
+              <span class="habit-name">Ejercicio 30 min</span>
+              <span class="cat-tag salud">Salud</span>
+            </div>
+            <div class="habit-freq">Lun · Mié · Vie · Sáb</div>
+          </div>
+          <div class="streak-pill">🔥 8</div>
+          <div class="best-val">14<span class="best-unit">d</span></div>
+          <div class="week-grid">
+            <div class="week-day done"></div>
+            <div class="week-day na"></div>
+            <div class="week-day done"></div>
+            <div class="week-day na"></div>
+            <div class="week-day done"></div>
+            <div class="week-day na"></div>
+            <div class="week-day done"></div>
+          </div>
+          <div class="rate-col">
+            <div class="rate-bar-bg"><div class="rate-bar-fill green" style="width:78%"></div></div>
+            <div class="rate-val">78%</div>
+          </div>
+          <div class="actions">
+            <button class="icon-btn">✎</button>
+            <button class="icon-btn">⏸</button>
+            <button class="icon-btn danger">✕</button>
+          </div>
+        </div>
+
+        <!-- 3 Leer -->
+        <div class="habit-row">
+          <span class="drag-handle">⠿</span>
+          <div class="habit-main">
+            <div class="habit-name-row">
+              <span class="habit-name">Leer 20 páginas</span>
+              <span class="cat-tag mente">Mente</span>
+            </div>
+            <div class="habit-freq">Todos los días · noche</div>
+          </div>
+          <div class="streak-pill">🔥 5</div>
+          <div class="best-val">9<span class="best-unit">d</span></div>
+          <div class="week-grid">
+            <div class="week-day done"></div>
+            <div class="week-day done"></div>
+            <div class="week-day miss"></div>
+            <div class="week-day done"></div>
+            <div class="week-day done"></div>
+            <div class="week-day done"></div>
+            <div class="week-day done"></div>
+          </div>
+          <div class="rate-col">
+            <div class="rate-bar-bg"><div class="rate-bar-fill" style="width:71%"></div></div>
+            <div class="rate-val">71%</div>
+          </div>
+          <div class="actions">
+            <button class="icon-btn">✎</button>
+            <button class="icon-btn">⏸</button>
+            <button class="icon-btn danger">✕</button>
+          </div>
+        </div>
+
+        <!-- 4 Journaling -->
+        <div class="habit-row">
+          <span class="drag-handle">⠿</span>
+          <div class="habit-main">
+            <div class="habit-name-row">
+              <span class="habit-name">Journaling</span>
+              <span class="cat-tag mente">Mente</span>
+            </div>
+            <div class="habit-freq">Todos los días · tarde</div>
+          </div>
+          <div class="streak-pill zero">— 3</div>
+          <div class="best-val">7<span class="best-unit">d</span></div>
+          <div class="week-grid">
+            <div class="week-day done"></div>
+            <div class="week-day miss"></div>
+            <div class="week-day done"></div>
+            <div class="week-day miss"></div>
+            <div class="week-day done"></div>
+            <div class="week-day miss"></div>
+            <div class="week-day miss"></div>
+          </div>
+          <div class="rate-col">
+            <div class="rate-bar-bg"><div class="rate-bar-fill" style="width:55%"></div></div>
+            <div class="rate-val">55%</div>
+          </div>
+          <div class="actions">
+            <button class="icon-btn">✎</button>
+            <button class="icon-btn">⏸</button>
+            <button class="icon-btn danger">✕</button>
+          </div>
+        </div>
+
+        <!-- 5 Agua -->
+        <div class="habit-row">
+          <span class="drag-handle">⠿</span>
+          <div class="habit-main">
+            <div class="habit-name-row">
+              <span class="habit-name">Agua · 2 litros</span>
+              <span class="cat-tag salud">Salud</span>
+            </div>
+            <div class="habit-freq">Todos los días</div>
+          </div>
+          <div class="streak-pill zero">— 0</div>
+          <div class="best-val">4<span class="best-unit">d</span></div>
+          <div class="week-grid">
+            <div class="week-day miss"></div>
+            <div class="week-day done"></div>
+            <div class="week-day miss"></div>
+            <div class="week-day miss"></div>
+            <div class="week-day skip"></div>
+            <div class="week-day miss"></div>
+            <div class="week-day miss"></div>
+          </div>
+          <div class="rate-col">
+            <div class="rate-bar-bg"><div class="rate-bar-fill green" style="width:42%"></div></div>
+            <div class="rate-val">42%</div>
+          </div>
+          <div class="actions">
+            <button class="icon-btn">✎</button>
+            <button class="icon-btn">⏸</button>
+            <button class="icon-btn danger">✕</button>
+          </div>
+        </div>
+
+        <!-- 6 Redes — paused -->
+        <div class="habit-row paused">
+          <span class="drag-handle">⠿</span>
+          <div class="habit-main">
+            <div class="habit-name-row">
+              <span class="habit-name">Sin redes sociales</span>
+              <span class="cat-tag prod">Productiv.</span>
+              <span class="paused-badge">Pausado</span>
+            </div>
+            <div class="habit-freq">Lun a Vie</div>
+          </div>
+          <div class="streak-pill zero">— 1</div>
+          <div class="best-val">5<span class="best-unit">d</span></div>
+          <div class="week-grid">
+            <div class="week-day na"></div>
+            <div class="week-day na"></div>
+            <div class="week-day na"></div>
+            <div class="week-day na"></div>
+            <div class="week-day na"></div>
+            <div class="week-day na"></div>
+            <div class="week-day na"></div>
+          </div>
+          <div class="rate-col">
+            <div class="rate-bar-bg"><div class="rate-bar-fill" style="width:38%"></div></div>
+            <div class="rate-val">38%</div>
+          </div>
+          <div class="actions">
+            <button class="icon-btn">✎</button>
+            <button class="icon-btn" title="Reanudar">▶</button>
+            <button class="icon-btn danger">✕</button>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="add-row">
+        <button class="add-btn">＋ Agregar hábito</button>
+      </div>
+    </div>
+
+  </main>
+</div>
+</body>
+</html>

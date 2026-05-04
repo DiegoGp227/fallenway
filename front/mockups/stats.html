@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HabitOS · Stats</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #13162a;
+      --surface: #1c1f35;
+      --border: #252840;
+      --border-hover: #333650;
+      --accent: #f01454;
+      --accent-dark: #a00d38;
+      --accent-bright: #f5527a;
+      --green: #2dd4a0;
+      --green-dim: #0d3d2e;
+      --amber: #f5a623;
+      --text: #c0c4e2;
+      --text-muted: #7a7e9a;
+      --text-dim: #40445e;
+      --completed-bg: #0f1120;
+      --nav-hover: #1a1d33;
+      --radius: 10px;
+      --radius-sm: 6px;
+    }
+
+    html, body { height: 100%; background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, sans-serif; font-size: 14px; line-height: 1.5; }
+
+    .layout { display: flex; height: 100vh; overflow: hidden; }
+
+    /* ── SIDEBAR ── */
+    .sidebar { width: 200px; flex-shrink: 0; background: var(--surface); border-right: 0.5px solid var(--border); display: flex; flex-direction: column; padding: 20px 0; }
+    .sidebar-logo { padding: 0 18px 24px; border-bottom: 0.5px solid var(--border); margin-bottom: 12px; }
+    .logo-text { font-size: 17px; font-weight: 700; letter-spacing: -0.3px; color: var(--text); }
+    .logo-text span { color: var(--accent); }
+    .logo-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+    .nav { display: flex; flex-direction: column; gap: 2px; padding: 0 10px; }
+    .nav-item { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: var(--radius-sm); color: var(--text-muted); cursor: pointer; font-size: 13.5px; font-weight: 500; transition: background 0.15s, color 0.15s; user-select: none; text-decoration: none; }
+    .nav-item:hover { background: var(--nav-hover); color: var(--text); }
+    .nav-item.active { background: rgba(240, 20, 84, 0.15); color: var(--accent-bright); }
+    .nav-icon { width: 16px; text-align: center; font-size: 14px; opacity: 0.9; }
+    .sidebar-footer { margin-top: auto; padding: 16px 18px 0; border-top: 0.5px solid var(--border); }
+    .user-pill { display: flex; align-items: center; gap: 8px; }
+    .avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--accent-dark); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #fff; flex-shrink: 0; }
+    .user-name { font-size: 12.5px; font-weight: 500; color: var(--text-muted); }
+
+    /* ── MAIN ── */
+    .main { flex: 1; overflow: hidden; display: flex; flex-direction: column; padding: 24px 28px; gap: 16px; }
+
+    /* ── HEADER ── */
+    .header { display: flex; align-items: center; justify-content: space-between; }
+    .header-left h1 { font-size: 20px; font-weight: 700; letter-spacing: -0.4px; }
+    .header-left .sub { font-size: 12.5px; color: var(--text-muted); margin-top: 2px; }
+    .period-tabs { display: flex; gap: 2px; background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius-sm); padding: 3px; }
+    .period-tab { padding: 4px 14px; border-radius: 4px; font-size: 12.5px; font-weight: 500; color: var(--text-muted); cursor: pointer; transition: all 0.15s; user-select: none; }
+    .period-tab:hover { color: var(--text); }
+    .period-tab.active { background: rgba(240, 20, 84, 0.2); color: var(--accent-bright); }
+
+    /* ── STAT CARDS ── */
+    .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+    .stat-card { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 14px 16px; }
+    .stat-label { font-size: 11px; color: var(--text-muted); font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
+    .stat-value { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; margin-top: 4px; }
+    .stat-value.green { color: var(--green); }
+    .stat-value.amber { color: var(--amber); }
+    .stat-value.accent { color: var(--accent-bright); }
+    .stat-value.text { color: var(--text); }
+    .stat-delta { font-size: 11px; color: var(--text-dim); margin-top: 3px; }
+    .stat-delta.up { color: var(--green); }
+    .stat-delta.down { color: var(--accent-bright); }
+
+    /* ── CONTENT GRID ── */
+    .content-grid { display: grid; grid-template-columns: 1fr 260px; gap: 14px; flex: 1; min-height: 0; }
+
+    .left-col { display: flex; flex-direction: column; gap: 14px; min-height: 0; }
+    .right-col { display: flex; flex-direction: column; gap: 14px; min-height: 0; }
+
+    /* ── PANEL ── */
+    .panel { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); display: flex; flex-direction: column; overflow: hidden; }
+    .panel-header { padding: 12px 16px; border-bottom: 0.5px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+    .panel-title { font-size: 13px; font-weight: 600; color: var(--text); }
+    .panel-sub { font-size: 11.5px; color: var(--text-dim); }
+    .panel-body { padding: 14px 16px; flex: 1; overflow: hidden; }
+
+    /* ── BAR CHART (monthly) ── */
+    .monthly-chart { height: 100%; display: flex; flex-direction: column; }
+    .bars-wrap { flex: 1; display: flex; align-items: flex-end; gap: 3px; min-height: 0; padding-bottom: 20px; position: relative; }
+
+    .bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; height: 100%; justify-content: flex-end; gap: 4px; }
+    .bar { width: 100%; border-radius: 3px 3px 0 0; background: var(--accent-dark); transition: background 0.15s; min-height: 2px; }
+    .bar.today { background: var(--accent); }
+    .bar.hi { background: rgba(160, 13, 56, 0.7); }
+    .bar-col:hover .bar { background: rgba(192, 48, 90, 0.9); }
+    .bar-col:hover .bar.today { background: var(--accent-bright); }
+
+    .x-labels { display: flex; gap: 3px; padding-top: 6px; }
+    .x-label { flex: 1; text-align: center; font-size: 9px; color: var(--text-dim); }
+    .x-label.today { color: var(--accent-bright); }
+    .x-label.week-start { color: var(--text-muted); }
+
+    /* ── PER-HABIT BARS ── */
+    .habit-bars { display: flex; flex-direction: column; gap: 10px; }
+    .hbar-row { display: flex; align-items: center; gap: 10px; }
+    .hbar-label { font-size: 12px; color: var(--text-muted); width: 140px; flex-shrink: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .hbar-track { flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+    .hbar-fill { height: 100%; border-radius: 3px; }
+    .hbar-fill.c1 { background: var(--accent); }
+    .hbar-fill.c2 { background: var(--green); }
+    .hbar-fill.c3 { background: var(--amber); }
+    .hbar-pct { font-size: 11.5px; font-weight: 600; color: var(--text-muted); width: 32px; text-align: right; flex-shrink: 0; }
+
+    /* ── HEATMAP ── */
+    .heatmap-panel { flex: 1; }
+    .heatmap-grid { display: grid; grid-template-columns: repeat(16, 1fr); gap: 3px; }
+    .hmap-cell { aspect-ratio: 1; border-radius: 2px; transition: background 0.15s; }
+    .hmap-cell:hover { opacity: 0.8; }
+    .hm-0  { background: var(--border); }
+    .hm-1  { background: rgba(160, 13, 56, 0.35); }
+    .hm-2  { background: rgba(160, 13, 56, 0.6); }
+    .hm-3  { background: rgba(240, 20, 84, 0.75); }
+    .hm-4  { background: var(--accent); }
+    .heatmap-legend { display: flex; align-items: center; gap: 6px; margin-top: 10px; }
+    .hm-legend-label { font-size: 10.5px; color: var(--text-dim); }
+    .hm-legend-squares { display: flex; gap: 3px; }
+    .hm-legend-sq { width: 10px; height: 10px; border-radius: 2px; }
+
+    /* ── RANKING ── */
+    .ranking-panel { }
+    .rank-list { display: flex; flex-direction: column; gap: 8px; }
+    .rank-row { display: flex; align-items: center; gap: 10px; padding: 8px 10px; background: var(--completed-bg); border: 0.5px solid var(--border); border-radius: var(--radius-sm); }
+    .rank-pos { font-size: 14px; width: 20px; text-align: center; flex-shrink: 0; }
+    .rank-info { flex: 1; min-width: 0; }
+    .rank-name { font-size: 12.5px; font-weight: 500; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .rank-streak { font-size: 11px; color: var(--text-dim); margin-top: 1px; }
+    .rank-pct { font-size: 13px; font-weight: 700; color: var(--accent-bright); flex-shrink: 0; }
+    .rank-pct.green { color: var(--green); }
+    .rank-pct.amber { color: var(--amber); }
+  </style>
+</head>
+<body>
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-text">Habit<span>OS</span></div>
+      <div class="logo-sub">Personal tracker</div>
+    </div>
+    <nav class="nav">
+      <a class="nav-item" href="index.html"><span class="nav-icon">◈</span>Today</a>
+      <a class="nav-item" href="habits.html"><span class="nav-icon">≡</span>Habits</a>
+      <a class="nav-item active" href="stats.html"><span class="nav-icon">↗</span>Stats</a>
+      <a class="nav-item" href="settings.html"><span class="nav-icon">⚙</span>Settings</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-pill">
+        <div class="avatar">DG</div>
+        <div class="user-name">Diego G.</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- HEADER -->
+    <div class="header">
+      <div class="header-left">
+        <h1>Estadísticas</h1>
+        <div class="sub">Mayo 2026</div>
+      </div>
+      <div class="period-tabs">
+        <div class="period-tab">Semana</div>
+        <div class="period-tab active">Mes</div>
+        <div class="period-tab">Año</div>
+      </div>
+    </div>
+
+    <!-- STATS -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-label">Completion rate</div>
+        <div class="stat-value accent">74<span style="font-size:13px;font-weight:500;color:var(--text-muted)">%</span></div>
+        <div class="stat-delta up">↑ 6% vs mes anterior</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Racha activa</div>
+        <div class="stat-value amber">7 <span style="font-size:13px;font-weight:500;color:var(--text-muted)">días</span></div>
+        <div class="stat-delta">Mejor: 21 días</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Días perfectos</div>
+        <div class="stat-value green">3</div>
+        <div class="stat-delta down">↓ 2 vs mes anterior</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Total completados</div>
+        <div class="stat-value text">89</div>
+        <div class="stat-delta">De 120 esperados</div>
+      </div>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="content-grid">
+
+      <!-- LEFT -->
+      <div class="left-col">
+
+        <!-- Monthly bar chart -->
+        <div class="panel" style="flex:1;min-height:0;">
+          <div class="panel-header">
+            <span class="panel-title">Actividad mensual</span>
+            <span class="panel-sub">últimos 28 días</span>
+          </div>
+          <div class="panel-body" style="display:flex;flex-direction:column;">
+            <div class="monthly-chart">
+              <div class="bars-wrap">
+                <!-- 28 bars, varying heights -->
+                <div class="bar-col"><div class="bar" style="height:50%"></div></div>
+                <div class="bar-col"><div class="bar" style="height:83%"></div></div>
+                <div class="bar-col"><div class="bar" style="height:67%"></div></div>
+                <div class="bar-col"><div class="bar hi" style="height:100%"></div></div>
+                <div class="bar-col"><div class="bar" style="height:83%"></div></div>
+                <div class="bar-col"><div class="bar" style="height:33%"></div></div>
+                <div class="bar-col"><div class="bar" style="height:67%"></div></div>
+                <div class="bar-col"><div class="bar" style="height:50%"></div></div>
+                <div class="bar-col"><div class="bar hi" style="height:100%"></div></div>
+                <div class="bar-col"><div class="bar" style="height:83%"></div></div>
+                <div class="bar-col"><div class="bar" style="height:67%"></div></div>
+                <div class="bar-col"><div class="bar" style="height:50%"></div></div>
+                <div class="bar-col"><div class="bar" style="height:83%"></div></div>
+                <div class="bar-col"><div class="bar" style="height:17%"></div></div>
+                <div class="bar-col"><div class="bar" style="height:67%"></div></div>
+                <div class="bar-col"><div class="bar" style="height:50%"></div></div>
+                <div class="bar-col"><div class="bar hi" style="height:100%"></div></div>
+                <div class="bar-col"><div class="bar" style="height:83%"></div></div>
+                <div class="bar-col"><div class="bar" style="height:50%"></div></div>
+                <div class="bar-col"><div class="bar" style="height:67%"></div></div>
+                <div class="bar-col"><div class="bar" style="height:83%"></div></div>
+                <div class="bar-col"><div class="bar" style="height:50%"></div></div>
+                <div class="bar-col"><div class="bar" style="height:67%"></div></div>
+                <div class="bar-col"><div class="bar" style="height:33%"></div></div>
+                <div class="bar-col"><div class="bar" style="height:83%"></div></div>
+                <div class="bar-col"><div class="bar" style="height:67%"></div></div>
+                <div class="bar-col"><div class="bar" style="height:50%"></div></div>
+                <div class="bar-col"><div class="bar today" style="height:67%"></div></div>
+              </div>
+              <div class="x-labels">
+                <div class="x-label week-start">5/4</div>
+                <div class="x-label"></div><div class="x-label"></div><div class="x-label"></div><div class="x-label"></div><div class="x-label"></div><div class="x-label"></div>
+                <div class="x-label week-start">12/4</div>
+                <div class="x-label"></div><div class="x-label"></div><div class="x-label"></div><div class="x-label"></div><div class="x-label"></div><div class="x-label"></div>
+                <div class="x-label week-start">19/4</div>
+                <div class="x-label"></div><div class="x-label"></div><div class="x-label"></div><div class="x-label"></div><div class="x-label"></div><div class="x-label"></div>
+                <div class="x-label week-start">26/4</div>
+                <div class="x-label"></div><div class="x-label"></div><div class="x-label"></div><div class="x-label"></div><div class="x-label"></div><div class="x-label"></div>
+                <div class="x-label today">hoy</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Per-habit breakdown -->
+        <div class="panel" style="flex-shrink:0;">
+          <div class="panel-header">
+            <span class="panel-title">Por hábito</span>
+            <span class="panel-sub">este mes</span>
+          </div>
+          <div class="panel-body">
+            <div class="habit-bars">
+              <div class="hbar-row">
+                <div class="hbar-label">Meditación diaria</div>
+                <div class="hbar-track"><div class="hbar-fill c1" style="width:87%"></div></div>
+                <div class="hbar-pct">87%</div>
+              </div>
+              <div class="hbar-row">
+                <div class="hbar-label">Sin redes sociales</div>
+                <div class="hbar-track"><div class="hbar-fill c2" style="width:91%"></div></div>
+                <div class="hbar-pct">91%</div>
+              </div>
+              <div class="hbar-row">
+                <div class="hbar-label">Leer 20 páginas</div>
+                <div class="hbar-track"><div class="hbar-fill c1" style="width:71%"></div></div>
+                <div class="hbar-pct">71%</div>
+              </div>
+              <div class="hbar-row">
+                <div class="hbar-label">Ejercicio 30 min</div>
+                <div class="hbar-track"><div class="hbar-fill c2" style="width:78%"></div></div>
+                <div class="hbar-pct">78%</div>
+              </div>
+              <div class="hbar-row">
+                <div class="hbar-label">Journaling</div>
+                <div class="hbar-track"><div class="hbar-fill c3" style="width:55%"></div></div>
+                <div class="hbar-pct">55%</div>
+              </div>
+              <div class="hbar-row">
+                <div class="hbar-label">Agua · 2 litros</div>
+                <div class="hbar-track"><div class="hbar-fill c3" style="width:42%"></div></div>
+                <div class="hbar-pct">42%</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- RIGHT -->
+      <div class="right-col">
+
+        <!-- Heatmap -->
+        <div class="panel heatmap-panel">
+          <div class="panel-header">
+            <span class="panel-title">Mapa de actividad</span>
+            <span class="panel-sub">112 días</span>
+          </div>
+          <div class="panel-body">
+            <div class="heatmap-grid">
+              <!-- 112 cells, 16 cols × 7 rows ≈ last 16 weeks -->
+              <div class="hmap-cell hm-2"></div><div class="hmap-cell hm-3"></div><div class="hmap-cell hm-1"></div><div class="hmap-cell hm-4"></div><div class="hmap-cell hm-2"></div><div class="hmap-cell hm-0"></div><div class="hmap-cell hm-3"></div><div class="hmap-cell hm-1"></div><div class="hmap-cell hm-4"></div><div class="hmap-cell hm-2"></div><div class="hmap-cell hm-3"></div><div class="hmap-cell hm-1"></div><div class="hmap-cell hm-2"></div><div class="hmap-cell hm-4"></div><div class="hmap-cell hm-3"></div><div class="hmap-cell hm-2"></div>
+              <div class="hmap-cell hm-0"></div><div class="hmap-cell hm-1"></div><div class="hmap-cell hm-4"></div><div class="hmap-cell hm-2"></div><div class="hmap-cell hm-3"></div><div class="hmap-cell hm-1"></div><div class="hmap-cell hm-0"></div><div class="hmap-cell hm-4"></div><div class="hmap-cell hm-2"></div><div class="hmap-cell hm-1"></div><div class="hmap-cell hm-3"></div><div class="hmap-cell hm-4"></div><div class="hmap-cell hm-0"></div><div class="hmap-cell hm-2"></div><div class="hmap-cell hm-1"></div><div class="hmap-cell hm-3"></div>
+              <div class="hmap-cell hm-3"></div><div class="hmap-cell hm-4"></div><div class="hmap-cell hm-2"></div><div class="hmap-cell hm-1"></div><div class="hmap-cell hm-0"></div><div class="hmap-cell hm-3"></div><div class="hmap-cell hm-4"></div><div class="hmap-cell hm-2"></div><div class="hmap-cell hm-3"></div><div class="hmap-cell hm-4"></div><div class="hmap-cell hm-1"></div><div class="hmap-cell hm-2"></div><div class="hmap-cell hm-3"></div><div class="hmap-cell hm-1"></div><div class="hmap-cell hm-4"></div><div class="hmap-cell hm-2"></div>
+              <div class="hmap-cell hm-1"></div><div class="hmap-cell hm-2"></div><div class="hmap-cell hm-3"></div><div class="hmap-cell hm-0"></div><div class="hmap-cell hm-4"></div><div class="hmap-cell hm-2"></div><div class="hmap-cell hm-1"></div><div class="hmap-cell hm-3"></div><div class="hmap-cell hm-0"></div><div class="hmap-cell hm-2"></div><div class="hmap-cell hm-4"></div><div class="hmap-cell hm-3"></div><div class="hmap-cell hm-1"></div><div class="hmap-cell hm-0"></div><div class="hmap-cell hm-2"></div><div class="hmap-cell hm-4"></div>
+              <div class="hmap-cell hm-4"></div><div class="hmap-cell hm-0"></div><div class="hmap-cell hm-1"></div><div class="hmap-cell hm-3"></div><div class="hmap-cell hm-2"></div><div class="hmap-cell hm-4"></div><div class="hmap-cell hm-3"></div><div class="hmap-cell hm-1"></div><div class="hmap-cell hm-4"></div><div class="hmap-cell hm-3"></div><div class="hmap-cell hm-0"></div><div class="hmap-cell hm-1"></div><div class="hmap-cell hm-4"></div><div class="hmap-cell hm-3"></div><div class="hmap-cell hm-0"></div><div class="hmap-cell hm-1"></div>
+              <div class="hmap-cell hm-2"></div><div class="hmap-cell hm-3"></div><div class="hmap-cell hm-0"></div><div class="hmap-cell hm-4"></div><div class="hmap-cell hm-1"></div><div class="hmap-cell hm-2"></div><div class="hmap-cell hm-0"></div><div class="hmap-cell hm-4"></div><div class="hmap-cell hm-1"></div><div class="hmap-cell hm-0"></div><div class="hmap-cell hm-2"></div><div class="hmap-cell hm-0"></div><div class="hmap-cell hm-2"></div><div class="hmap-cell hm-1"></div><div class="hmap-cell hm-3"></div><div class="hmap-cell hm-2"></div>
+              <div class="hmap-cell hm-1"></div><div class="hmap-cell hm-4"></div><div class="hmap-cell hm-3"></div><div class="hmap-cell hm-2"></div><div class="hmap-cell hm-4"></div><div class="hmap-cell hm-0"></div><div class="hmap-cell hm-2"></div><div class="hmap-cell hm-3"></div><div class="hmap-cell hm-2"></div><div class="hmap-cell hm-4"></div><div class="hmap-cell hm-3"></div><div class="hmap-cell hm-2"></div><div class="hmap-cell hm-3"></div><div class="hmap-cell hm-4"></div><div class="hmap-cell hm-2"></div><div class="hmap-cell hm-4"></div>
+            </div>
+            <div class="heatmap-legend">
+              <div class="hm-legend-label">Menos</div>
+              <div class="hm-legend-squares">
+                <div class="hm-legend-sq hm-0"></div>
+                <div class="hm-legend-sq hm-1"></div>
+                <div class="hm-legend-sq hm-2"></div>
+                <div class="hm-legend-sq hm-3"></div>
+                <div class="hm-legend-sq hm-4"></div>
+              </div>
+              <div class="hm-legend-label">Más</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Ranking -->
+        <div class="panel ranking-panel" style="flex-shrink:0;">
+          <div class="panel-header">
+            <span class="panel-title">Top hábitos</span>
+            <span class="panel-sub">este mes</span>
+          </div>
+          <div class="panel-body">
+            <div class="rank-list">
+              <div class="rank-row">
+                <div class="rank-pos">🥇</div>
+                <div class="rank-info">
+                  <div class="rank-name">Sin redes sociales</div>
+                  <div class="rank-streak">🔥 Racha: 1 día · mejor: 5</div>
+                </div>
+                <div class="rank-pct green">91%</div>
+              </div>
+              <div class="rank-row">
+                <div class="rank-pos">🥈</div>
+                <div class="rank-info">
+                  <div class="rank-name">Meditación diaria</div>
+                  <div class="rank-streak">🔥 Racha: 12 días · mejor: 21</div>
+                </div>
+                <div class="rank-pct">87%</div>
+              </div>
+              <div class="rank-row">
+                <div class="rank-pos">🥉</div>
+                <div class="rank-info">
+                  <div class="rank-name">Ejercicio 30 min</div>
+                  <div class="rank-streak">🔥 Racha: 8 días · mejor: 14</div>
+                </div>
+                <div class="rank-pct amber">78%</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+</div>
+</body>
+</html>
