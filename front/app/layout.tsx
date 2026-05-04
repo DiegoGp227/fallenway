@@ -46,7 +46,7 @@ export default function RootLayout({
 
         <SWRProvider>
           <ConditionalHeader />
-          <div className="relative z-10 max-w-screen-2xl mx-auto flex-1 w-full flex flex-col px-4 sm:px-6">
+          <div className="relative z-10 max-w-screen-2xl mx-auto flex-1 w-full flex flex-col px-4 sm:px-6 h-full">
             {children}
           </div>
         </SWRProvider>
