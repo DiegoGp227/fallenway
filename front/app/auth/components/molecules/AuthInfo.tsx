@@ -1,6 +1,6 @@
 export default function AuthInfo() {
   return (
-    <div>
+    <div className="h-50 flex justify-center flex-col" >
       <div className="flex items-center text text-accent-bright gap-2">
         <hr className="h-0.5 w-3"></hr>
         Personal Habit Tracker
