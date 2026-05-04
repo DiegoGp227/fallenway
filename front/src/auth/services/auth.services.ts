@@ -24,7 +24,6 @@ export function SignUpService(
   const response = postFetcher<IAuthResponse>(url, {
     email: credentials.email,
     password: credentials.password,
-    username: credentials.username,
     name: credentials.name,
   });
   return response;
