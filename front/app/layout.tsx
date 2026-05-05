@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { Inter, DM_Sans } from "next/font/google";
 import { SWRProvider } from "@/provider/StoreProvider";
 import ConditionalHeader from "./components/molecules/ConditionalHeader";
+import ConditionalContent from "./components/molecules/ConditionalContent";
 
 const inter = Inter({
   weight: ["300", "400", "500", "600", "700", "800"],
@@ -46,9 +47,11 @@ export default function RootLayout({
 
         <SWRProvider>
           <ConditionalHeader />
-          <div className="relative z-10 max-w-screen-2xl mx-auto flex-1 w-full flex flex-col px-4 sm:px-6 h-full">
-            {children}
-          </div>
+          <ConditionalContent>
+            <div className="max-w-screen-2xl mx-auto flex-1 w-full flex flex-col px-4 sm:px-6 h-full">
+              {children}
+            </div>
+          </ConditionalContent>
         </SWRProvider>
       </body>
     </html>
