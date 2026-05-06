@@ -12,4 +12,4 @@ COPY . .
 
 EXPOSE 8000
 
-CMD ["sh", "-c", "pnpm exec prisma generate && pnpm exec prisma db push && pnpm exec tsx prisma/seed.ts && pnpm exec tsx watch src/app/index.ts"]
+CMD ["sh", "-c", "pnpm exec prisma generate && pnpm exec prisma db push && pnpm exec tsx watch src/app/index.ts"]
