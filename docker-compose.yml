@@ -37,8 +37,6 @@ services:
     restart: unless-stopped
     env_file:
       - .env
-    environment:
-      NEXT_PUBLIC_API_URL: http://back:8000/api/
     ports:
       - "${FRONT_PORT:-5004}:3000"
     depends_on:
