@@ -36,10 +36,9 @@ export default function Sidebar() {
                   href={route}
                   className={`
                     flex items-center gap-3 px-3 py-2.5 rounded-app-sm transition-colors
-                    ${
-                      isActive
-                        ? "bg-accent/15 text-accent border-r-2 border-accent"
-                        : "text-text-muted hover:bg-nav-hover hover:text-text"
+                    ${isActive
+                      ? "bg-accent/15 text-accent border-r-2 border-accent"
+                      : "text-text-muted hover:bg-nav-hover hover:text-text"
                     }
                   `}
                 >
