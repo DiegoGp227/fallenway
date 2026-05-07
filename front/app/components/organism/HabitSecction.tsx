@@ -1,6 +1,6 @@
 export default function HabitSecction() {
     return (
-        <div className="flex border border-bg justify-between hover:bg-surface hover:border-border-hover px-2 transition-all duration-200">
+        <div className="flex border border-bg/60 justify-between hover:bg-surface hover:border-border-hover px-2 transition-all duration-200">
             <div className="flex gap-2 items-center">
                 <div className="px-1">
                     <span className="cursor-grab text-text-muted hover:text-text">⠿</span>
