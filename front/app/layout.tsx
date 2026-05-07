@@ -48,7 +48,7 @@ export default function RootLayout({
         <SWRProvider>
           <ConditionalHeader />
           <ConditionalContent>
-            <div className="max-w-screen-2xl mx-auto flex-1 w-full flex flex-col px-4 sm:px-6 h-full">
+            <div className="flex-1 w-full flex flex-col py-6 px-8 h-full gap-7">
               {children}
             </div>
           </ConditionalContent>

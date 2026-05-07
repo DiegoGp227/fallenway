@@ -448,7 +448,13 @@
       display: flex;
       flex-direction: column;
       padding: 14px 16px;
-      gap: 12px;
+      gap: 10px;
+    }
+
+    .chart-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
     }
 
     .chart-title {
@@ -457,19 +463,67 @@
       color: var(--text);
     }
 
+    .chart-avg-badge {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--accent-bright);
+      background: rgba(240, 20, 84, 0.12);
+      border: 0.5px solid rgba(240, 20, 84, 0.25);
+      border-radius: 20px;
+      padding: 2px 8px;
+    }
+
     .chart-area {
-      flex: 1;
+      position: relative;
+      display: flex;
+      gap: 8px;
+    }
+
+    .chart-y-axis {
       display: flex;
       flex-direction: column;
-      justify-content: flex-end;
-      min-height: 0;
+      justify-content: space-between;
+      padding-bottom: 18px;
+      flex-shrink: 0;
+    }
+
+    .y-label {
+      font-size: 9px;
+      color: var(--text-dim);
+      text-align: right;
+      line-height: 1;
+    }
+
+    .chart-grid-bars {
+      flex: 1;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .chart-grid-lines {
+      position: absolute;
+      inset: 0;
+      bottom: 18px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      pointer-events: none;
+    }
+
+    .grid-line {
+      width: 100%;
+      height: 0.5px;
+      background: var(--border);
     }
 
     .bars-container {
       display: flex;
       align-items: flex-end;
       gap: 6px;
-      height: 120px;
+      height: 160px;
+      position: relative;
+      z-index: 1;
     }
 
     .bar-col {
@@ -479,7 +533,9 @@
       align-items: center;
       height: 100%;
       justify-content: flex-end;
-      gap: 6px;
+      gap: 5px;
+      position: relative;
+      cursor: pointer;
     }
 
     .bar {
@@ -504,45 +560,195 @@
 
     .bar-label {
       font-size: 10.5px;
-      color: var(--text-dim);
+      color: var(--text-muted);
       font-weight: 500;
+      line-height: 1;
+      height: 14px;
+      display: flex;
+      align-items: center;
     }
 
     .bar-label.today {
       color: var(--accent-bright);
     }
 
-    .bar-pct {
+    /* tooltip */
+    .bar-tooltip {
+      position: absolute;
+      bottom: calc(100% + 6px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: #0e1023;
+      border: 0.5px solid var(--border-hover);
+      border-radius: 6px;
+      padding: 4px 7px;
+      white-space: nowrap;
+      font-size: 10px;
+      color: var(--text);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.1s;
+      z-index: 10;
+    }
+
+    .bar-tooltip .tt-pct {
+      font-weight: 700;
+      color: var(--accent-bright);
+    }
+
+    .bar-tooltip .tt-count {
+      color: var(--text-muted);
+      margin-left: 3px;
+    }
+
+    .bar-col:hover .bar-tooltip {
+      opacity: 1;
+    }
+
+    /* chart footer stats */
+    .chart-stats {
+      display: flex;
+      gap: 0;
+      border-top: 0.5px solid var(--border);
+      padding-top: 10px;
+    }
+
+    .chart-stat {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .chart-stat + .chart-stat {
+      border-left: 0.5px solid var(--border);
+      padding-left: 12px;
+    }
+
+    .chart-stat-label {
       font-size: 10px;
       color: var(--text-dim);
-      margin-bottom: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
     }
 
-    .bar-pct.today {
-      color: var(--accent);
+    .chart-stat-value {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text);
     }
 
-    .chart-legend {
+    .chart-stat-value .stat-accent { color: var(--accent-bright); }
+    .chart-stat-value .stat-green  { color: var(--green); }
+    .chart-stat-value .stat-amber  { color: var(--amber); }
+
+    /* ── RIGHT COLUMN ── */
+    .right-col {
       display: flex;
-      gap: 14px;
+      flex-direction: column;
+      gap: 12px;
+      min-height: 0;
     }
 
-    .legend-item {
+    /* ── CONTRIBUTION PANEL ── */
+    .contrib-panel {
+      background: var(--surface);
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .contrib-header {
       display: flex;
       align-items: center;
-      gap: 5px;
+      justify-content: space-between;
+    }
+
+    .contrib-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .contrib-count {
       font-size: 11px;
       color: var(--text-dim);
     }
 
-    .legend-dot {
-      width: 8px;
-      height: 8px;
+    .contrib-month-row {
+      display: flex;
+      padding-left: 20px;
+      gap: 0;
+    }
+
+    .contrib-month-label {
+      font-size: 9px;
+      color: var(--text-dim);
+      flex-shrink: 0;
+    }
+
+    .contrib-body {
+      display: flex;
+      gap: 4px;
+    }
+
+    .contrib-day-labels {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      flex-shrink: 0;
+    }
+
+    .contrib-day-label {
+      font-size: 8px;
+      color: var(--text-dim);
+      height: 10px;
+      line-height: 10px;
+      width: 14px;
+      text-align: right;
+    }
+
+    .contrib-grid {
+      display: grid;
+      grid-template-rows: repeat(7, 10px);
+      grid-auto-columns: 10px;
+      grid-auto-flow: column;
+      gap: 2px;
+    }
+
+    .cc {
+      width: 10px;
+      height: 10px;
       border-radius: 2px;
     }
 
-    .legend-dot.accent { background: var(--accent); }
-    .legend-dot.accent-dark { background: var(--accent-dark); }
+    .cc-0 { background: var(--border); }
+    .cc-1 { background: rgba(160,13,56,.35); }
+    .cc-2 { background: rgba(160,13,56,.65); }
+    .cc-3 { background: var(--accent-dark); }
+    .cc-4 { background: var(--accent); filter: brightness(1.1); }
+    .cc-f { background: transparent; border: 0.5px solid var(--border); opacity: 0.35; }
+    .cc-today { box-shadow: 0 0 0 1.5px var(--accent-bright); }
+
+    .contrib-legend {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      justify-content: flex-end;
+    }
+
+    .contrib-legend-label {
+      font-size: 9px;
+      color: var(--text-dim);
+    }
+
+    .contrib-legend-cells {
+      display: flex;
+      gap: 2px;
+    }
 
     /* divider in habits */
     .list-divider {
@@ -707,69 +913,182 @@
         <button class="add-habit-btn">＋ Agregar hábito</button>
       </div>
 
+      <!-- RIGHT COLUMN -->
+      <div class="right-col">
+
       <!-- CHART PANEL -->
       <div class="chart-panel">
-        <div class="chart-title">Últimos 7 días</div>
+        <div class="chart-header">
+          <div class="chart-title">Últimos 7 días</div>
+          <div class="chart-avg-badge">74% promedio</div>
+        </div>
 
         <div class="chart-area">
-          <div class="bars-container">
+          <!-- Y axis labels -->
+          <div class="chart-y-axis">
+            <span class="y-label">100</span>
+            <span class="y-label">75</span>
+            <span class="y-label">50</span>
+            <span class="y-label">25</span>
+            <span class="y-label">0</span>
+          </div>
 
-            <div class="bar-col">
-              <div class="bar-pct">50%</div>
-              <div class="bar" style="height: 50%"></div>
-              <div class="bar-label">D</div>
+          <div class="chart-grid-bars">
+            <!-- horizontal grid lines -->
+            <div class="chart-grid-lines">
+              <div class="grid-line"></div>
+              <div class="grid-line"></div>
+              <div class="grid-line"></div>
+              <div class="grid-line"></div>
+              <div class="grid-line"></div>
             </div>
 
-            <div class="bar-col">
-              <div class="bar-pct">83%</div>
-              <div class="bar" style="height: 83%"></div>
-              <div class="bar-label">L</div>
-            </div>
+            <div class="bars-container">
 
-            <div class="bar-col">
-              <div class="bar-pct">67%</div>
-              <div class="bar" style="height: 67%"></div>
-              <div class="bar-label">M</div>
-            </div>
+              <div class="bar-col">
+                <div class="bar-tooltip"><span class="tt-pct">50%</span><span class="tt-count">3/6</span></div>
+                <div class="bar" style="height: 50%"></div>
+                <div class="bar-label">D</div>
+              </div>
 
-            <div class="bar-col">
-              <div class="bar-pct">100%</div>
-              <div class="bar" style="height: 100%"></div>
-              <div class="bar-label">X</div>
-            </div>
+              <div class="bar-col">
+                <div class="bar-tooltip"><span class="tt-pct">83%</span><span class="tt-count">5/6</span></div>
+                <div class="bar" style="height: 83%"></div>
+                <div class="bar-label">L</div>
+              </div>
 
-            <div class="bar-col">
-              <div class="bar-pct">83%</div>
-              <div class="bar" style="height: 83%"></div>
-              <div class="bar-label">J</div>
-            </div>
+              <div class="bar-col">
+                <div class="bar-tooltip"><span class="tt-pct">67%</span><span class="tt-count">4/6</span></div>
+                <div class="bar" style="height: 67%"></div>
+                <div class="bar-label">M</div>
+              </div>
 
-            <div class="bar-col">
-              <div class="bar-pct">67%</div>
-              <div class="bar" style="height: 67%"></div>
-              <div class="bar-label">V</div>
-            </div>
+              <div class="bar-col">
+                <div class="bar-tooltip"><span class="tt-pct">100%</span><span class="tt-count">6/6</span></div>
+                <div class="bar" style="height: 100%"></div>
+                <div class="bar-label">X</div>
+              </div>
 
-            <div class="bar-col">
-              <div class="bar-pct today">67%</div>
-              <div class="bar today" style="height: 67%"></div>
-              <div class="bar-label today">S ·</div>
-            </div>
+              <div class="bar-col">
+                <div class="bar-tooltip"><span class="tt-pct">83%</span><span class="tt-count">5/6</span></div>
+                <div class="bar" style="height: 83%"></div>
+                <div class="bar-label">J</div>
+              </div>
 
+              <div class="bar-col">
+                <div class="bar-tooltip"><span class="tt-pct">67%</span><span class="tt-count">4/6</span></div>
+                <div class="bar" style="height: 67%"></div>
+                <div class="bar-label">V</div>
+              </div>
+
+              <div class="bar-col">
+                <div class="bar-tooltip"><span class="tt-pct">67%</span><span class="tt-count">4/6</span></div>
+                <div class="bar today" style="height: 67%"></div>
+                <div class="bar-label today">S · hoy</div>
+              </div>
+
+            </div>
           </div>
         </div>
 
-        <div class="chart-legend">
-          <div class="legend-item">
-            <div class="legend-dot accent"></div>
-            Hoy
+        <!-- footer stats replacing the legend -->
+        <div class="chart-stats">
+          <div class="chart-stat">
+            <span class="chart-stat-label">Mejor día</span>
+            <span class="chart-stat-value"><span class="stat-green">X · 100%</span></span>
           </div>
-          <div class="legend-item">
-            <div class="legend-dot accent-dark"></div>
-            Días anteriores
+          <div class="chart-stat" style="padding-left:12px;">
+            <span class="chart-stat-label">Racha actual</span>
+            <span class="chart-stat-value"><span class="stat-accent">4 días</span></span>
+          </div>
+          <div class="chart-stat" style="padding-left:12px;">
+            <span class="chart-stat-label">vs semana ant.</span>
+            <span class="chart-stat-value"><span class="stat-green">↑ +12%</span></span>
           </div>
         </div>
       </div>
+
+      <!-- CONTRIBUTION PANEL -->
+      <div class="contrib-panel">
+
+        <div class="contrib-header">
+          <div class="contrib-title">Este año</div>
+          <div class="contrib-count">312 días completados</div>
+        </div>
+
+        <!-- month labels -->
+        <div class="contrib-month-row">
+          <span class="contrib-month-label" style="width:22px">Ene</span>
+          <span class="contrib-month-label" style="width:48px">Feb</span>
+          <span class="contrib-month-label" style="width:48px">Mar</span>
+          <span class="contrib-month-label" style="width:48px">Abr</span>
+          <span class="contrib-month-label" style="width:24px">May</span>
+        </div>
+
+        <div class="contrib-body">
+          <!-- day labels -->
+          <div class="contrib-day-labels">
+            <div class="contrib-day-label">L</div>
+            <div class="contrib-day-label">M</div>
+            <div class="contrib-day-label">X</div>
+            <div class="contrib-day-label">J</div>
+            <div class="contrib-day-label">V</div>
+            <div class="contrib-day-label">S</div>
+            <div class="contrib-day-label">D</div>
+          </div>
+
+          <!-- grid: rows=day of week (L→D), cols=weeks oldest→newest -->
+          <div class="contrib-grid">
+            <!-- W0 Ene 19-25 -->
+            <div class="cc cc-2"></div><div class="cc cc-1"></div><div class="cc cc-2"></div><div class="cc cc-3"></div><div class="cc cc-2"></div><div class="cc cc-0"></div><div class="cc cc-0"></div>
+            <!-- W1 Ene 26–Feb 1 -->
+            <div class="cc cc-3"></div><div class="cc cc-2"></div><div class="cc cc-3"></div><div class="cc cc-2"></div><div class="cc cc-3"></div><div class="cc cc-1"></div><div class="cc cc-1"></div>
+            <!-- W2 Feb 2-8 -->
+            <div class="cc cc-2"></div><div class="cc cc-3"></div><div class="cc cc-3"></div><div class="cc cc-3"></div><div class="cc cc-2"></div><div class="cc cc-1"></div><div class="cc cc-0"></div>
+            <!-- W3 Feb 9-15 -->
+            <div class="cc cc-3"></div><div class="cc cc-3"></div><div class="cc cc-4"></div><div class="cc cc-3"></div><div class="cc cc-3"></div><div class="cc cc-2"></div><div class="cc cc-1"></div>
+            <!-- W4 Feb 16-22 -->
+            <div class="cc cc-3"></div><div class="cc cc-4"></div><div class="cc cc-3"></div><div class="cc cc-4"></div><div class="cc cc-3"></div><div class="cc cc-2"></div><div class="cc cc-2"></div>
+            <!-- W5 Feb 23–Mar 1 -->
+            <div class="cc cc-4"></div><div class="cc cc-3"></div><div class="cc cc-4"></div><div class="cc cc-4"></div><div class="cc cc-3"></div><div class="cc cc-2"></div><div class="cc cc-2"></div>
+            <!-- W6 Mar 2-8 -->
+            <div class="cc cc-4"></div><div class="cc cc-4"></div><div class="cc cc-4"></div><div class="cc cc-3"></div><div class="cc cc-4"></div><div class="cc cc-2"></div><div class="cc cc-1"></div>
+            <!-- W7 Mar 9-15 -->
+            <div class="cc cc-4"></div><div class="cc cc-4"></div><div class="cc cc-4"></div><div class="cc cc-4"></div><div class="cc cc-4"></div><div class="cc cc-3"></div><div class="cc cc-2"></div>
+            <!-- W8 Mar 16-22 -->
+            <div class="cc cc-4"></div><div class="cc cc-4"></div><div class="cc cc-4"></div><div class="cc cc-4"></div><div class="cc cc-4"></div><div class="cc cc-3"></div><div class="cc cc-3"></div>
+            <!-- W9 Mar 23-29 -->
+            <div class="cc cc-4"></div><div class="cc cc-4"></div><div class="cc cc-4"></div><div class="cc cc-4"></div><div class="cc cc-4"></div><div class="cc cc-3"></div><div class="cc cc-2"></div>
+            <!-- W10 Mar 30–Abr 5 -->
+            <div class="cc cc-4"></div><div class="cc cc-4"></div><div class="cc cc-4"></div><div class="cc cc-4"></div><div class="cc cc-3"></div><div class="cc cc-2"></div><div class="cc cc-2"></div>
+            <!-- W11 Abr 6-12 -->
+            <div class="cc cc-3"></div><div class="cc cc-3"></div><div class="cc cc-4"></div><div class="cc cc-4"></div><div class="cc cc-4"></div><div class="cc cc-3"></div><div class="cc cc-2"></div>
+            <!-- W12 Abr 13-19 -->
+            <div class="cc cc-3"></div><div class="cc cc-2"></div><div class="cc cc-3"></div><div class="cc cc-4"></div><div class="cc cc-3"></div><div class="cc cc-2"></div><div class="cc cc-1"></div>
+            <!-- W13 Abr 20-26 -->
+            <div class="cc cc-3"></div><div class="cc cc-3"></div><div class="cc cc-4"></div><div class="cc cc-3"></div><div class="cc cc-4"></div><div class="cc cc-2"></div><div class="cc cc-2"></div>
+            <!-- W14 Abr 27–May 3 -->
+            <div class="cc cc-4"></div><div class="cc cc-4"></div><div class="cc cc-3"></div><div class="cc cc-4"></div><div class="cc cc-3"></div><div class="cc cc-2"></div><div class="cc cc-2"></div>
+            <!-- W15 May 4-6 + futuros -->
+            <div class="cc cc-4"></div><div class="cc cc-3"></div><div class="cc cc-3 cc-today"></div><div class="cc cc-f"></div><div class="cc cc-f"></div><div class="cc cc-f"></div><div class="cc cc-f"></div>
+          </div>
+        </div>
+
+        <div class="contrib-legend">
+          <span class="contrib-legend-label">Menos</span>
+          <div class="contrib-legend-cells">
+            <div class="cc cc-0"></div>
+            <div class="cc cc-1"></div>
+            <div class="cc cc-2"></div>
+            <div class="cc cc-3"></div>
+            <div class="cc cc-4"></div>
+          </div>
+          <span class="contrib-legend-label">Más</span>
+        </div>
+
+      </div>
+
+      </div><!-- /right-col -->
 
     </div>
   </main>
