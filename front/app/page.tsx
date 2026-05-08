@@ -1,20 +1,14 @@
+import ProgressBadge from "./components/molecules/ProgressBadge";
 import HabitList from "./components/organism/HabitList";
+import HeaderInfo from "./components/organism/HeaderInfo";
 import TodayOverview from "./components/organism/TodayOverview";
 
 export default function HomePage() {
   return (
     <>
-      <header className="flex justify-between w-full">
-        <div>
-          <h2 className="text-text text-2xl">Today</h2>
-          <p className="text-text-muted">Monday 05 may 2026</p>
-        </div>
-        <div className="flex items-center">
-          <div className="border-accent-bright rounded-4xl bg-accent-dark border-2 px-2">
-            <p>4/6 Complete</p>
-          </div>
-        </div>
-      </header>
+      <HeaderInfo title="Today" subTitle="Monday 05 may 2026">
+        <ProgressBadge completed={6} total={6} />
+      </HeaderInfo>
       <TodayOverview />
       <div className="flex w-full flex-1 gap-7">
         <HabitList />

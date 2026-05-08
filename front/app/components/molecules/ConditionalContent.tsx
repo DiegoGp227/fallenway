@@ -2,7 +2,7 @@
 
 import { usePathname } from "next/navigation";
 
-const SIDEBAR_ROUTES = ["/", "/projects", "/profile"];
+const SIDEBAR_ROUTES = ["/", "/projects", "/profile", "/habits"];
 
 export default function ConditionalContent({
   children,
