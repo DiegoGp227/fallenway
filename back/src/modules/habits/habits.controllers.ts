@@ -7,8 +7,14 @@ import {
   createHabit,
   getHabitById,
   getHabits,
+  getHabitsToday,
   updateHabit,
 } from "./habits.services.js";
+
+export const getTodayHabits = asyncHandler(async (req: Request, res: Response) => {
+  const result = await getHabitsToday(req.user!.id);
+  res.status(200).json(result);
+});
 
 export const listHabits = asyncHandler(async (req: Request, res: Response) => {
   const habits = await getHabits(req.user!.id);
