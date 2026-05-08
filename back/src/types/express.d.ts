@@ -3,7 +3,7 @@ import "express";
 declare module "express" {
   interface Request {
     user?: {
-      id: number;
+      id: string;
       email: string;
     };
   }
