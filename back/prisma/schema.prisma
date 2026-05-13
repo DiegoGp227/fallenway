@@ -24,9 +24,24 @@ model User {
   reminderTime String?
   timezone     String  @default("America/Bogota")
 
-  habits Habit[]
+  habits     Habit[]
+  categories Category[]
 
   @@map("users")
+}
+
+model Category {
+  id        String   @id @default(cuid())
+  userId    String
+  name      String
+  color     String   @default("#7a7e9a")
+  createdAt DateTime @default(now())
+
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  habits Habit[]
+
+  @@unique([userId, name])
+  @@map("categories")
 }
 
 model Habit {
@@ -37,6 +52,7 @@ model Habit {
   color       String?
   sortOrder   Int       @default(0)
   active      Boolean   @default(true)
+  paused      Boolean   @default(false)
   archivedAt  DateTime?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
@@ -45,6 +61,9 @@ model Habit {
   weekDays     Int[]     @default([])
   timesPerWeek Int?
   intervalDays Int?
+
+  categoryId String?
+  category   Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
 
   user     User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   subtasks Subtask[]
