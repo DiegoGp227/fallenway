@@ -1,8 +1,9 @@
 import HabitList from "@/app/components/organism/HabitList";
+import HabitTable from "./HabitTable";
 
 export default function HabitOrganism() {
     return (
-        <div>
+        <div className="flex flex-col gap-7">
             <div className="flex justify-between">
                 <div className="flex gap-10">
                     <div className="bg-accent-bg px-4 py-1 rounded-2xl border-2 border-accent-bright">all</div>
@@ -16,7 +17,7 @@ export default function HabitOrganism() {
                     </span>
                 </div>
             </div>
-            <HabitList />
+            <HabitTable />
         </div>
     )
 }
