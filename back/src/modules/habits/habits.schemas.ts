@@ -10,6 +10,7 @@ export const createHabitSchema = z.object({
   weekDays: z.array(z.number().int().min(0).max(6)).optional().default([]),
   timesPerWeek: z.number().int().min(1).optional(),
   intervalDays: z.number().int().min(1).optional(),
+  categoryId: z.string().optional(),
 });
 
 export const updateHabitSchema = z.object({
@@ -21,6 +22,8 @@ export const updateHabitSchema = z.object({
   timesPerWeek: z.number().int().min(1).nullable().optional(),
   intervalDays: z.number().int().min(1).nullable().optional(),
   sortOrder: z.number().int().min(0).optional(),
+  categoryId: z.string().nullable().optional(),
+  paused: z.boolean().optional(),
 });
 
 export type CreateHabitDTO = z.infer<typeof createHabitSchema>;

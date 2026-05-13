@@ -2,14 +2,41 @@ import { Frequency, LogStatus } from "@prisma/client";
 import prisma from "../../db/prisma.js";
 import { ForbiddenError, NotFoundError } from "../../errors/appError.js";
 import { CreateHabitDTO, UpdateHabitDTO } from "./habits.schemas.js";
-import { getDayOfWeekInTimezone, getTodayInTimezone, getWeekBounds } from "./habits.utils.js";
+import {
+  computeBestStreak,
+  computeMonthRate,
+  computeStreak,
+  computeWeekStatus,
+  getDayOfWeekInTimezone,
+  getTodayInTimezone,
+  getWeekBounds,
+} from "./habits.utils.js";
 
 export const getHabits = async (userId: string) => {
-  return prisma.habit.findMany({
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { timezone: true },
+  });
+  const timezone = user?.timezone ?? "America/Bogota";
+  const todayStr = getTodayInTimezone(timezone);
+
+  const habits = await prisma.habit.findMany({
     where: { userId, active: true },
-    include: { subtasks: { orderBy: { sortOrder: "asc" } } },
+    include: {
+      subtasks: { orderBy: { sortOrder: "asc" } },
+      category: true,
+      logs: { orderBy: { date: "asc" } },
+    },
     orderBy: { sortOrder: "asc" },
   });
+
+  return habits.map(({ logs, ...habit }) => ({
+    ...habit,
+    streak: computeStreak({ ...habit, logs }, todayStr),
+    bestStreak: computeBestStreak({ ...habit, logs }),
+    weekStatus: computeWeekStatus({ ...habit, logs }, todayStr),
+    monthRate: computeMonthRate({ ...habit, logs }, todayStr),
+  }));
 };
 
 export const getHabitById = async (habitId: string, userId: string) => {
