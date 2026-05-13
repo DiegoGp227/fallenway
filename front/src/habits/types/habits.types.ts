@@ -38,3 +38,30 @@ export interface HabitsResponse {
 export interface CategoriesResponse {
   categories: HabitCategory[];
 }
+
+export interface TodayHabitLog {
+  id: string;
+  status: "COMPLETED" | "SKIPPED";
+  note: string | null;
+  subtaskLogs: string[];
+}
+
+export interface TodayHabit {
+  id: string;
+  name: string;
+  description: string | null;
+  color: string | null;
+  sortOrder: number;
+  frequency: Frequency;
+  weekDays: number[];
+  timesPerWeek: number | null;
+  intervalDays: number | null;
+  streak: number;
+  log: TodayHabitLog | null;
+  weekProgress?: { completed: number; target: number };
+}
+
+export interface TodayHabitsResponse {
+  date: string;
+  habits: TodayHabit[];
+}

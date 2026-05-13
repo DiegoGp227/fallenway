@@ -40,6 +40,14 @@ export function logHabit(id: string, data: LogHabitData): Promise<{ log: HabitLo
   return postFetcher<{ log: HabitLog }>(`${HabitsURL}/${id}/log`, data);
 }
 
+export function reorderHabits(ids: string[]): Promise<void> {
+  return patchFetcher(`${HabitsURL}/reorder`, { ids });
+}
+
+export function deleteHabitLog(id: string): Promise<void> {
+  return deleteFetcher(`${HabitsURL}/${id}/log`);
+}
+
 // ── Categories ───────────────────────────────────────────────────────────────
 
 export function getCategories(): Promise<CategoriesResponse> {

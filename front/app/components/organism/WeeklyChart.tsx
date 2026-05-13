@@ -39,7 +39,7 @@ export default function WeeklyChart() {
   }
 
   return (
-    <div className="bg-surface border border-border rounded-[10px] p-3.5 flex flex-col gap-2.5">
+    <div className="bg-bg/60 border border-border rounded-[10px] p-3.5 flex flex-col gap-2.5">
       {/* Header */}
       <div className="flex items-center justify-between">
         <span className="text-[13px] font-semibold text-text">Últimos 7 días</span>
@@ -100,7 +100,7 @@ export default function WeeklyChart() {
                     day.isToday ? "text-accent-bright" : "text-text-muted"
                   }`}
                 >
-                  {day.isToday ? `${day.label} · hoy` : day.label}
+                  {day.isToday ? `${day.label}·hoy` : day.label}
                 </span>
               </div>
             ))}

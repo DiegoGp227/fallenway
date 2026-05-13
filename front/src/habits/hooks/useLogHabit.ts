@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { mutate } from "swr";
-import { ContributionsUrl } from "@/src/shared/constants/urls";
-import { HabitLog, LogHabitData, logHabit as logHabitService } from "../services/habits.services";
+import { ContributionsUrl, StatsTodayURL } from "@/src/shared/constants/urls";
+import { HABITS_TODAY_KEY } from "./useTodayHabits";
+import { HabitLog, LogHabitData, deleteHabitLog as deleteHabitLogService, logHabit as logHabitService } from "../services/habits.services";
 
 interface LogHabitState {
   log: HabitLog | null;
@@ -24,7 +25,11 @@ export default function useLogHabit() {
     try {
       const { log } = await logHabitService(habitId, data);
       setState({ log, loading: false, error: null });
-      await mutate(ContributionsUrl.toString());
+      await Promise.all([
+        mutate(ContributionsUrl.toString()),
+        mutate(StatsTodayURL.toString()),
+        mutate(HABITS_TODAY_KEY),
+      ]);
       return true;
     } catch {
       setState({ log: null, loading: false, error: "Error logging habit" });
@@ -32,5 +37,22 @@ export default function useLogHabit() {
     }
   };
 
-  return { ...state, handleLogHabit };
+  const handleDeleteLog = async (habitId: string): Promise<boolean> => {
+    setState({ log: null, loading: true, error: null });
+    try {
+      await deleteHabitLogService(habitId);
+      setState({ log: null, loading: false, error: null });
+      await Promise.all([
+        mutate(ContributionsUrl.toString()),
+        mutate(StatsTodayURL.toString()),
+        mutate(HABITS_TODAY_KEY),
+      ]);
+      return true;
+    } catch {
+      setState({ log: null, loading: false, error: "Error removing log" });
+      return false;
+    }
+  };
+
+  return { ...state, handleLogHabit, handleDeleteLog };
 }
