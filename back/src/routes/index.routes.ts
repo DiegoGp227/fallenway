@@ -10,6 +10,13 @@ import {
   listHabits,
   updateHabitHandler,
 } from "../modules/habits/habits.controllers.js";
+import {
+  createCategoryHandler,
+  deleteCategoryHandler,
+  listCategories,
+  updateCategoryHandler,
+} from "../modules/categories/categories.controllers.js";
+import { getContributionsHandler } from "../modules/stats/stats.controllers.js";
 
 export const router: Router = Router();
 
@@ -27,3 +34,12 @@ router.get("/habits/today", authMiddleware, getTodayHabits);
 router.get("/habits/:id", authMiddleware, getHabit);
 router.patch("/habits/:id", authMiddleware, updateHabitHandler);
 router.delete("/habits/:id", authMiddleware, archiveHabitHandler);
+
+// Stats Routes
+router.get("/stats/contributions", authMiddleware, getContributionsHandler);
+
+// Categories Routes
+router.get("/categories", authMiddleware, listCategories);
+router.post("/categories", authMiddleware, createCategoryHandler);
+router.patch("/categories/:id", authMiddleware, updateCategoryHandler);
+router.delete("/categories/:id", authMiddleware, deleteCategoryHandler);
