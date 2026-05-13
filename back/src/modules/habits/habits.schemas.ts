@@ -28,3 +28,10 @@ export const updateHabitSchema = z.object({
 
 export type CreateHabitDTO = z.infer<typeof createHabitSchema>;
 export type UpdateHabitDTO = z.infer<typeof updateHabitSchema>;
+
+export const logHabitSchema = z.object({
+  status: z.enum(["COMPLETED", "SKIPPED"]),
+  note: z.string().optional(),
+});
+
+export type LogHabitDTO = z.infer<typeof logHabitSchema>;

@@ -8,6 +8,7 @@ import {
   getHabit,
   getTodayHabits,
   listHabits,
+  logHabitHandler,
   updateHabitHandler,
 } from "../modules/habits/habits.controllers.js";
 import {
@@ -33,6 +34,7 @@ router.post("/habits", authMiddleware, createHabitHandler);
 router.get("/habits/today", authMiddleware, getTodayHabits);
 router.get("/habits/:id", authMiddleware, getHabit);
 router.patch("/habits/:id", authMiddleware, updateHabitHandler);
+router.post("/habits/:id/log", authMiddleware, logHabitHandler);
 router.delete("/habits/:id", authMiddleware, archiveHabitHandler);
 
 // Stats Routes

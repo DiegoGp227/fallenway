@@ -1,13 +1,14 @@
 import { Request, Response } from "express";
 import { ValidationError } from "../../errors/appError.js";
 import { asyncHandler } from "../../middlewares/asyncHandler.js";
-import { createHabitSchema, updateHabitSchema } from "./habits.schemas.js";
+import { createHabitSchema, logHabitSchema, updateHabitSchema } from "./habits.schemas.js";
 import {
   archiveHabit,
   createHabit,
   getHabitById,
   getHabits,
   getHabitsToday,
+  logHabit,
   updateHabit,
 } from "./habits.services.js";
 
@@ -59,4 +60,19 @@ export const updateHabitHandler = asyncHandler(async (req: Request, res: Respons
 export const archiveHabitHandler = asyncHandler(async (req: Request, res: Response) => {
   await archiveHabit(req.params.id as string, req.user!.id);
   res.status(200).json({ message: "Habit archived" });
+});
+
+export const logHabitHandler = asyncHandler(async (req: Request, res: Response) => {
+  const result = logHabitSchema.safeParse(req.body);
+
+  if (!result.success) {
+    const errors = result.error.issues.reduce<Record<string, string>>((acc, err) => {
+      acc[err.path.join(".")] = err.message;
+      return acc;
+    }, {});
+    throw new ValidationError("Validation errors", errors);
+  }
+
+  const log = await logHabit(req.params.id as string, req.user!.id, result.data);
+  res.status(200).json({ log });
 });

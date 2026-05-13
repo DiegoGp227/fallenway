@@ -1,7 +1,7 @@
 import { Frequency, LogStatus } from "@prisma/client";
 import prisma from "../../db/prisma.js";
 import { ForbiddenError, NotFoundError } from "../../errors/appError.js";
-import { CreateHabitDTO, UpdateHabitDTO } from "./habits.schemas.js";
+import { CreateHabitDTO, LogHabitDTO, UpdateHabitDTO } from "./habits.schemas.js";
 import {
   computeBestStreak,
   computeMonthRate,
@@ -10,6 +10,7 @@ import {
   getDayOfWeekInTimezone,
   getTodayInTimezone,
   getWeekBounds,
+  isDueOnDateWithWeekLogs,
 } from "./habits.utils.js";
 
 export const getHabits = async (userId: string) => {
@@ -184,4 +185,61 @@ export const archiveHabit = async (habitId: string, userId: string) => {
     where: { id: habitId },
     data: { active: false, archivedAt: new Date() },
   });
+};
+
+async function recalcDailyContribution(userId: string, todayStr: string): Promise<void> {
+  const todayDate = new Date(todayStr + "T00:00:00.000Z");
+  const { weekStart, nextWeekStart } = getWeekBounds(todayStr);
+
+  const habits = await prisma.habit.findMany({
+    where: { userId, active: true },
+    include: {
+      logs: { where: { date: { gte: weekStart, lt: nextWeekStart } } },
+    },
+  });
+
+  let total = 0;
+  let completed = 0;
+
+  for (const habit of habits) {
+    const weekLogsExcludingToday = habit.logs.filter(
+      (l) => l.date.getTime() !== todayDate.getTime(),
+    );
+    const weekCompletedExcludingToday = weekLogsExcludingToday.filter(
+      (l) => l.status === LogStatus.COMPLETED,
+    ).length;
+
+    if (isDueOnDateWithWeekLogs(habit, todayDate, weekCompletedExcludingToday)) {
+      total++;
+      const todayLog = habit.logs.find((l) => l.date.getTime() === todayDate.getTime());
+      if (todayLog?.status === LogStatus.COMPLETED) completed++;
+    }
+  }
+
+  await prisma.dailyContribution.upsert({
+    where: { userId_date: { userId, date: todayDate } },
+    update: { completed, total },
+    create: { userId, date: todayDate, completed, total },
+  });
+}
+
+export const logHabit = async (habitId: string, userId: string, data: LogHabitDTO) => {
+  const habit = await prisma.habit.findUnique({ where: { id: habitId } });
+  if (!habit) throw new NotFoundError("Habit not found");
+  if (habit.userId !== userId) throw new ForbiddenError("Access denied");
+
+  const user = await prisma.user.findUnique({ where: { id: userId }, select: { timezone: true } });
+  const timezone = user?.timezone ?? "America/Bogota";
+  const todayStr = getTodayInTimezone(timezone);
+  const todayDate = new Date(todayStr + "T00:00:00.000Z");
+
+  const log = await prisma.habitLog.upsert({
+    where: { habitId_date: { habitId, date: todayDate } },
+    update: { status: data.status, note: data.note ?? null, source: "WEB" },
+    create: { habitId, date: todayDate, status: data.status, note: data.note ?? null, source: "WEB" },
+  });
+
+  await recalcDailyContribution(userId, todayStr);
+
+  return log;
 };

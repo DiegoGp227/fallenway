@@ -71,6 +71,34 @@ export const isHabitDueOnDate = (habit: HabitForStats, date: Date): boolean => {
   }
 };
 
+export const isDueOnDateWithWeekLogs = (
+  habit: {
+    frequency: Frequency;
+    weekDays: number[];
+    timesPerWeek: number | null;
+    intervalDays: number | null;
+    createdAt: Date;
+  },
+  date: Date,
+  weekCompletedExcludingToday: number,
+): boolean => {
+  switch (habit.frequency) {
+    case Frequency.DAILY:
+      return true;
+    case Frequency.SPECIFIC_DAYS:
+      return habit.weekDays.includes(date.getUTCDay());
+    case Frequency.EVERY_N_DAYS: {
+      const created = new Date(habit.createdAt.toISOString().split("T")[0] + "T00:00:00.000Z");
+      const diff = daysBetween(created, date);
+      return diff >= 0 && diff % (habit.intervalDays ?? 1) === 0;
+    }
+    case Frequency.TIMES_PER_WEEK:
+      return weekCompletedExcludingToday < (habit.timesPerWeek ?? 1);
+    default:
+      return false;
+  }
+};
+
 export const computeStreak = (habit: HabitForStats, todayStr: string): number => {
   const today = dateFromStr(todayStr);
   const created = new Date(habit.createdAt.toISOString().split("T")[0] + "T00:00:00.000Z");
