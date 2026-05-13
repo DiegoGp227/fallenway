@@ -2,6 +2,22 @@ import { CategoriesURL, HabitsURL } from "@/src/shared/constants/urls";
 import { deleteFetcher, fetcher, patchFetcher, postFetcher } from "@/utils/utils";
 import { CategoriesResponse, Habit, HabitCategory, HabitsResponse } from "../types/habits.types";
 
+export interface HabitLog {
+  id: string;
+  habitId: string;
+  date: string;
+  status: "COMPLETED" | "SKIPPED";
+  note: string | null;
+  source: "WEB" | "TELEGRAM";
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface LogHabitData {
+  status: "COMPLETED" | "SKIPPED";
+  note?: string;
+}
+
 // ── Habits ──────────────────────────────────────────────────────────────────
 
 export function getHabits(): Promise<HabitsResponse> {
@@ -18,6 +34,10 @@ export function updateHabit(id: string, data: Partial<Habit>): Promise<{ habit: 
 
 export function archiveHabit(id: string): Promise<{ message: string }> {
   return deleteFetcher(`${HabitsURL}/${id}`);
+}
+
+export function logHabit(id: string, data: LogHabitData): Promise<{ log: HabitLog }> {
+  return postFetcher<{ log: HabitLog }>(`${HabitsURL}/${id}/log`, data);
 }
 
 // ── Categories ───────────────────────────────────────────────────────────────
