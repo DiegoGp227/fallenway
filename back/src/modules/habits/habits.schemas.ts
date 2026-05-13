@@ -35,3 +35,9 @@ export const logHabitSchema = z.object({
 });
 
 export type LogHabitDTO = z.infer<typeof logHabitSchema>;
+
+export const reorderHabitsSchema = z.object({
+  ids: z.array(z.string()),
+});
+
+export type ReorderHabitsDTO = z.infer<typeof reorderHabitsSchema>;

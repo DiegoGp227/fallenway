@@ -1,7 +1,7 @@
 import { Frequency, LogStatus } from "@prisma/client";
 import prisma from "../../db/prisma.js";
 import { ForbiddenError, NotFoundError } from "../../errors/appError.js";
-import { CreateHabitDTO, LogHabitDTO, UpdateHabitDTO } from "./habits.schemas.js";
+import { CreateHabitDTO, LogHabitDTO, ReorderHabitsDTO, UpdateHabitDTO } from "./habits.schemas.js";
 import {
   computeBestStreak,
   computeMonthRate,
@@ -92,17 +92,27 @@ export const getHabitsToday = async (userId: string) => {
   const todayDate = new Date(todayStr + "T00:00:00.000Z");
   const { weekStart, nextWeekStart } = getWeekBounds(todayStr);
 
-  const habits = await prisma.habit.findMany({
-    where: { userId, active: true },
-    include: {
-      subtasks: { orderBy: { sortOrder: "asc" } },
-      logs: {
-        where: { date: { gte: weekStart, lt: nextWeekStart } },
-        include: { subtaskLogs: { select: { subtaskId: true } } },
+  const [habits, habitsForStreak] = await Promise.all([
+    prisma.habit.findMany({
+      where: { userId, active: true },
+      include: {
+        subtasks: { orderBy: { sortOrder: "asc" } },
+        logs: {
+          where: { date: { gte: weekStart, lt: nextWeekStart } },
+          include: { subtaskLogs: { select: { subtaskId: true } } },
+        },
       },
-    },
-    orderBy: { sortOrder: "asc" },
-  });
+      orderBy: { sortOrder: "asc" },
+    }),
+    prisma.habit.findMany({
+      where: { userId, active: true },
+      include: { logs: true },
+    }),
+  ]);
+
+  const streakMap = new Map(
+    habitsForStreak.map((h) => [h.id, computeStreak(h, todayStr)]),
+  );
 
   const result = habits
     .filter((habit) => isDueToday(habit, todayDate, dayOfWeek))
@@ -122,6 +132,7 @@ export const getHabitsToday = async (userId: string) => {
         timesPerWeek: habit.timesPerWeek,
         intervalDays: habit.intervalDays,
         subtasks: habit.subtasks,
+        streak: streakMap.get(habit.id) ?? 0,
         log: todayLog
           ? {
               id: todayLog.id,
@@ -173,6 +184,21 @@ const isDueToday = (habit: HabitWithLogs, todayDate: Date, dayOfWeek: number): b
     default:
       return false;
   }
+};
+
+export const reorderHabits = async (userId: string, data: ReorderHabitsDTO) => {
+  const habits = await prisma.habit.findMany({
+    where: { id: { in: data.ids }, userId },
+    select: { id: true },
+  });
+
+  if (habits.length !== data.ids.length) throw new ForbiddenError("Access denied");
+
+  await prisma.$transaction(
+    data.ids.map((id, index) =>
+      prisma.habit.update({ where: { id }, data: { sortOrder: index } }),
+    ),
+  );
 };
 
 export const archiveHabit = async (habitId: string, userId: string) => {
@@ -242,4 +268,18 @@ export const logHabit = async (habitId: string, userId: string, data: LogHabitDT
   await recalcDailyContribution(userId, todayStr);
 
   return log;
+};
+
+export const deleteHabitLog = async (habitId: string, userId: string) => {
+  const habit = await prisma.habit.findUnique({ where: { id: habitId } });
+  if (!habit) throw new NotFoundError("Habit not found");
+  if (habit.userId !== userId) throw new ForbiddenError("Access denied");
+
+  const user = await prisma.user.findUnique({ where: { id: userId }, select: { timezone: true } });
+  const timezone = user?.timezone ?? "America/Bogota";
+  const todayStr = getTodayInTimezone(timezone);
+  const todayDate = new Date(todayStr + "T00:00:00.000Z");
+
+  await prisma.habitLog.deleteMany({ where: { habitId, date: todayDate } });
+  await recalcDailyContribution(userId, todayStr);
 };

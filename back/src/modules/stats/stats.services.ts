@@ -1,6 +1,6 @@
 import { LogStatus } from "@prisma/client";
 import prisma from "../../db/prisma.js";
-import { getTodayInTimezone, isHabitDueOnDate } from "../habits/habits.utils.js";
+import { computeBestStreak, getTodayInTimezone, getWeekBounds, isHabitDueOnDate, isDueOnDateWithWeekLogs } from "../habits/habits.utils.js";
 
 export const getContributions = async (userId: string) => {
   const user = await prisma.user.findUnique({
@@ -63,4 +63,67 @@ export const getContributions = async (userId: string) => {
   }
 
   return { contributions };
+};
+
+export const getTodayStats = async (userId: string) => {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { timezone: true },
+  });
+  const timezone = user?.timezone ?? "America/Bogota";
+  const todayStr = getTodayInTimezone(timezone);
+  const todayDate = new Date(todayStr + "T00:00:00.000Z");
+
+  const sevenDaysAgo = new Date(todayDate);
+  sevenDaysAgo.setUTCDate(todayDate.getUTCDate() - 6);
+
+  const { weekStart, nextWeekStart } = getWeekBounds(todayStr);
+
+  const [todayRow, weekRows, habits, habitsToday] = await Promise.all([
+    prisma.dailyContribution.findUnique({
+      where: { userId_date: { userId, date: todayDate } },
+    }),
+    prisma.dailyContribution.findMany({
+      where: { userId, date: { gte: sevenDaysAgo, lte: todayDate } },
+    }),
+    prisma.habit.findMany({
+      where: { userId, active: true },
+      include: { logs: true },
+    }),
+    prisma.habit.findMany({
+      where: { userId, active: true },
+      include: { logs: { where: { date: { gte: weekStart, lt: nextWeekStart } } } },
+    }),
+  ]);
+
+  const completedToday = todayRow?.completed ?? 0;
+
+  let totalToday = 0;
+  for (const habit of habitsToday) {
+    const weekCompletedExcludingToday = habit.logs
+      .filter((l) => l.date.getTime() !== todayDate.getTime() && l.status === LogStatus.COMPLETED)
+      .length;
+    if (isDueOnDateWithWeekLogs(habit, todayDate, weekCompletedExcludingToday)) {
+      totalToday++;
+    }
+  }
+
+  const weeklyRate = weekRows.length > 0
+    ? Math.round(
+        weekRows.reduce((sum, r) => sum + (r.total > 0 ? r.completed / r.total : 0), 0) /
+          weekRows.length * 100,
+      )
+    : 0;
+
+  let bestStreak = 0;
+  let bestStreakHabit = "";
+  for (const habit of habits) {
+    const streak = computeBestStreak(habit);
+    if (streak > bestStreak) {
+      bestStreak = streak;
+      bestStreakHabit = habit.name;
+    }
+  }
+
+  return { completedToday, totalToday, weeklyRate, bestStreak, bestStreakHabit };
 };

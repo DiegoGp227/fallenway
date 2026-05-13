@@ -111,6 +111,8 @@ export const computeStreak = (habit: HabitForStats, todayStr: string): number =>
       const log = findLog(habit.logs, current);
       if (log?.status === LogStatus.COMPLETED) {
         streak++;
+      } else if (log?.status === LogStatus.SKIPPED) {
+        // intentional skip: doesn't add to streak but doesn't break it
       } else {
         break;
       }

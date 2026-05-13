@@ -5,10 +5,12 @@ import { authMiddleware } from "../middlewares/auth.middleware.js";
 import {
   archiveHabitHandler,
   createHabitHandler,
+  deleteHabitLogHandler,
   getHabit,
   getTodayHabits,
   listHabits,
   logHabitHandler,
+  reorderHabitsHandler,
   updateHabitHandler,
 } from "../modules/habits/habits.controllers.js";
 import {
@@ -17,7 +19,7 @@ import {
   listCategories,
   updateCategoryHandler,
 } from "../modules/categories/categories.controllers.js";
-import { getContributionsHandler } from "../modules/stats/stats.controllers.js";
+import { getContributionsHandler, getTodayStatsHandler } from "../modules/stats/stats.controllers.js";
 
 export const router: Router = Router();
 
@@ -32,12 +34,15 @@ router.post("/login", login);
 router.get("/habits", authMiddleware, listHabits);
 router.post("/habits", authMiddleware, createHabitHandler);
 router.get("/habits/today", authMiddleware, getTodayHabits);
+router.patch("/habits/reorder", authMiddleware, reorderHabitsHandler);
 router.get("/habits/:id", authMiddleware, getHabit);
 router.patch("/habits/:id", authMiddleware, updateHabitHandler);
 router.post("/habits/:id/log", authMiddleware, logHabitHandler);
+router.delete("/habits/:id/log", authMiddleware, deleteHabitLogHandler);
 router.delete("/habits/:id", authMiddleware, archiveHabitHandler);
 
 // Stats Routes
+router.get("/stats/today", authMiddleware, getTodayStatsHandler);
 router.get("/stats/contributions", authMiddleware, getContributionsHandler);
 
 // Categories Routes
