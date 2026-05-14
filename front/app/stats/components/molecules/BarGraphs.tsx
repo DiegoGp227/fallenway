@@ -66,13 +66,13 @@ const SKELETON_HEIGHTS = [55, 80, 40, 95, 60, 75, 35, 88, 50, 70, 42, 90, 65, 78
 
 function BarGraphSkeleton() {
     return (
-        <div className="bg-surface border border-border rounded-[10px] flex flex-col overflow-hidden flex-1 min-h-0">
-            <div className="px-4 py-3 border-b border-border flex items-center justify-between flex-shrink-0">
-                <div className="h-[13px] w-16 bg-border rounded animate-pulse" />
-                <div className="h-[11px] w-20 bg-border rounded animate-pulse" />
+        <div className="bg-bg/60 border border-border rounded-[10px] flex flex-col overflow-hidden flex-1 min-h-0">
+            <div className="px-4 py-3 border-b border-border flex items-center justify-between shrink-0">
+                <div className="h-3.25 w-16 bg-border rounded animate-pulse" />
+                <div className="h-2.75 w-20 bg-border rounded animate-pulse" />
             </div>
             <div className="px-4 pt-3.5 pb-3 flex-1 flex flex-col min-h-0">
-                <div className="flex-1 flex items-end gap-[3px] min-h-[140px] animate-pulse">
+                <div className="flex-1 flex items-end gap-0.75 min-h-35 animate-pulse">
                     {SKELETON_HEIGHTS.map((h, i) => (
                         <div
                             key={i}
@@ -81,9 +81,9 @@ function BarGraphSkeleton() {
                         />
                     ))}
                 </div>
-                <div className="flex gap-[3px] pt-[6px]">
+                <div className="flex gap-0.75 pt-1.5">
                     {SKELETON_HEIGHTS.map((_, i) => (
-                        <div key={i} className="flex-1 h-[8px]" />
+                        <div key={i} className="flex-1 h-2" />
                     ))}
                 </div>
             </div>
@@ -102,17 +102,17 @@ export default function BarGraphs({ dateRange }: BarGraphsProps) {
     const maxRate = Math.max(...bars.map(b => b.rate), 1);
 
     return (
-        <div className={`bg-surface border border-border rounded-[10px] flex flex-col overflow-hidden flex-1 min-h-0 transition-opacity duration-200 ${refreshing ? "opacity-50" : "opacity-100"}`}>
-            <div className="px-4 py-3 border-b border-border flex items-center justify-between flex-shrink-0">
+        <div className={`bg-bg/60 border border-border rounded-[10px] flex flex-col overflow-hidden flex-1 min-h-0 transition-opacity duration-200 ${refreshing ? "opacity-50" : "opacity-100"}`}>
+            <div className="px-4 py-3 border-b border-border flex items-center justify-between shrink-0">
                 <span className="text-[13px] font-semibold text-text">Activity</span>
                 <span className="text-[11.5px] text-text-dim">{PERIOD_LABEL[dateRange]}</span>
             </div>
             <div className="px-4 pt-3.5 pb-3 flex-1 flex flex-col min-h-0">
-                <div className="flex-1 flex items-end gap-[3px] min-h-[140px]">
+                <div className="flex-1 flex items-end gap-0.75 min-h-35">
                     {bars.map((bar) => (
                         <div key={bar.key} className="flex-1 flex flex-col items-center justify-end h-full">
                             <div
-                                className={`w-full rounded-t-[3px] min-h-[2px] transition-colors ${
+                                className={`w-full rounded-t-[3px] min-h-0.5 transition-colors ${
                                     bar.isHighlight ? "bg-accent" : "bg-accent-dark hover:bg-accent/70"
                                 }`}
                                 style={{ height: `${Math.max((bar.rate / maxRate) * 100, 2)}%` }}
@@ -121,7 +121,7 @@ export default function BarGraphs({ dateRange }: BarGraphsProps) {
                         </div>
                     ))}
                 </div>
-                <div className="flex gap-[3px] pt-[6px]">
+                <div className="flex gap-0.75 pt-1.5">
                     {bars.map((bar) => (
                         <div key={bar.key} className="flex-1 text-center">
                             {bar.label && (

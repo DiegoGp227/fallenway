@@ -60,14 +60,14 @@ function getPeriodStart(dateRange: string): Date {
 
 function ContributionSkeleton() {
     return (
-        <div className="bg-surface border border-border rounded-[10px] flex flex-col overflow-hidden flex-1 min-h-0">
-            <div className="px-4 py-3 border-b border-border flex items-center justify-between flex-shrink-0">
-                <div className="h-[13px] w-24 bg-border rounded animate-pulse" />
-                <div className="h-[11px] w-12 bg-border rounded animate-pulse" />
+        <div className="bg-bg/60 border-border rounded-[10px] flex flex-col overflow-hidden flex-1 min-h-0">
+            <div className="px-4 py-3 border-b border-border flex items-center justify-between shrink-0">
+                <div className="h-3.25 w-24 bg-border rounded animate-pulse" />
+                <div className="h-2.75 w-12 bg-border rounded animate-pulse" />
             </div>
             <div className="px-4 py-3.5 flex flex-col gap-3">
                 <div
-                    className="grid gap-[3px] animate-pulse"
+                    className="grid gap-0.75 animate-pulse"
                     style={{
                         gridTemplateRows: `repeat(7, ${CELL}px)`,
                         gridAutoFlow: "column",
@@ -75,15 +75,15 @@ function ContributionSkeleton() {
                     }}
                 >
                     {Array.from({ length: WEEKS * 7 }).map((_, i) => (
-                        <div key={i} className="bg-border rounded-[2px]" style={{ width: CELL, height: CELL }} />
+                        <div key={i} className="bg-border rounded-xs" style={{ width: CELL, height: CELL }} />
                     ))}
                 </div>
-                <div className="flex items-center gap-[6px]">
-                    <div className="h-[10px] w-6 bg-border rounded animate-pulse" />
-                    <div className="flex gap-[3px]">
-                        {[0,1,2,3,4].map(l => <div key={l} className="bg-border rounded-[2px]" style={{ width: 10, height: 10 }} />)}
+                <div className="flex items-center gap-1.5">
+                    <div className="h-2.5 w-6 bg-border rounded animate-pulse" />
+                    <div className="flex gap-0.75">
+                        {[0, 1, 2, 3, 4].map(l => <div key={l} className="bg-border rounded-xs" style={{ width: 10, height: 10 }} />)}
                     </div>
-                    <div className="h-[10px] w-6 bg-border rounded animate-pulse" />
+                    <div className="h-2.5 w-6 bg-border rounded animate-pulse" />
                 </div>
             </div>
         </div>
@@ -99,14 +99,14 @@ export default function ContributionGraph({ dateRange }: ContributionGraphProps)
     const periodStart = getPeriodStart(dateRange);
 
     return (
-        <div className={`bg-surface border border-border rounded-[10px] flex flex-col overflow-hidden flex-1 min-h-0 transition-opacity duration-200 ${refreshing ? "opacity-50" : "opacity-100"}`}>
-            <div className="px-4 py-3 border-b border-border flex items-center justify-between flex-shrink-0">
+        <div className={`bg-bg/60 border border-border rounded-[10px] flex flex-col overflow-hidden flex-1 min-h-0 transition-opacity duration-200 ${refreshing ? "opacity-50" : "opacity-100"}`}>
+            <div className="px-4 py-3 border-b border-border flex items-center justify-between shrink-0">
                 <span className="text-[13px] font-semibold text-text">Activity map</span>
                 <span className="text-[11.5px] text-text-dim">{WEEKS * 7} days</span>
             </div>
             <div className="px-4 py-3.5 flex flex-col gap-3">
                 <div
-                    className="grid gap-[3px]"
+                    className="grid gap-0.75"
                     style={{
                         gridTemplateRows: `repeat(7, ${CELL}px)`,
                         gridAutoFlow: "column",
@@ -116,7 +116,7 @@ export default function ContributionGraph({ dateRange }: ContributionGraphProps)
                     {cells.map(({ dateStr, level, isFuture, date }) => (
                         <div
                             key={dateStr}
-                            className="rounded-[2px] transition-opacity hover:opacity-80"
+                            className="rounded-xs transition-opacity hover:opacity-80"
                             style={{
                                 width: CELL,
                                 height: CELL,
@@ -127,11 +127,11 @@ export default function ContributionGraph({ dateRange }: ContributionGraphProps)
                         />
                     ))}
                 </div>
-                <div className="flex items-center gap-[6px]">
+                <div className="flex items-center gap-1.5">
                     <span className="text-[10.5px] text-text-dim">Less</span>
-                    <div className="flex gap-[3px]">
+                    <div className="flex gap-0.75">
                         {[0, 1, 2, 3, 4].map(l => (
-                            <div key={l} className="rounded-[2px]" style={{ width: 10, height: 10, background: LEVEL_BG[l] }} />
+                            <div key={l} className="rounded-xs" style={{ width: 10, height: 10, background: LEVEL_BG[l] }} />
                         ))}
                     </div>
                     <span className="text-[10.5px] text-text-dim">More</span>

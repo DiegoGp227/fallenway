@@ -10,9 +10,9 @@ interface StatsOverviewProps {
 function CardSkeleton() {
     return (
         <div className="bg-bg/60 border border-border rounded-[10px] w-full px-4 py-3.5 animate-pulse">
-            <div className="h-[10px] w-20 bg-border rounded mb-3" />
-            <div className="h-[26px] w-14 bg-border rounded mb-2" />
-            <div className="h-[10px] w-16 bg-border rounded" />
+            <div className="h-2.5 w-20 bg-border rounded mb-3" />
+            <div className="h-6.5 w-14 bg-border rounded mb-2" />
+            <div className="h-2.5 w-16 bg-border rounded" />
         </div>
     );
 }
