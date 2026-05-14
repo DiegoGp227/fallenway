@@ -125,5 +125,27 @@ export const getTodayStats = async (userId: string) => {
     }
   }
 
-  return { completedToday, totalToday, weeklyRate, bestStreak, bestStreakHabit };
+  const year = todayDate.getUTCFullYear();
+  const jan1 = new Date(Date.UTC(year, 0, 1));
+  const yearContributions = await prisma.dailyContribution.findMany({
+    where: { userId, date: { gte: jan1, lte: todayDate } },
+    select: { date: true, completed: true, total: true },
+  });
+
+  const byMonth = new Map<string, { completed: number; total: number }>();
+  for (const row of yearContributions) {
+    const key = row.date.toISOString().slice(0, 7);
+    const acc = byMonth.get(key) ?? { completed: 0, total: 0 };
+    byMonth.set(key, { completed: acc.completed + row.completed, total: acc.total + row.total });
+  }
+
+  let bestMonthRate = 0;
+  let bestMonthKey  = "";
+  for (const [key, { completed, total }] of byMonth) {
+    if (total === 0) continue;
+    const rate = Math.round((completed / total) * 100);
+    if (rate > bestMonthRate) { bestMonthRate = rate; bestMonthKey = key; }
+  }
+
+  return { completedToday, totalToday, weeklyRate, bestStreak, bestStreakHabit, bestMonthRate, bestMonthKey };
 };

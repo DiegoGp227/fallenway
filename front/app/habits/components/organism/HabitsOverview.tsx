@@ -1,0 +1,65 @@
+"use client";
+
+import useHabits from "@/src/habits/hooks/useHabits";
+import useStatsToday from "@/src/habits/hooks/useStatsToday";
+
+const MONTHS = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+
+function formatMonthKey(key: string): string {
+  if (!key) return "—";
+  const [year, month] = key.split("-");
+  return `${MONTHS[parseInt(month) - 1]} ${year}`;
+}
+
+export default function HabitsOverview() {
+  const { habits } = useHabits();
+  const { stats }  = useStatsToday();
+
+  const active   = habits.filter((h) => h.active);
+  const archived = habits.filter((h) => !h.active).length;
+
+  const nonPaused = active.filter((h) => !h.paused);
+  const avgStreak = nonPaused.length > 0
+    ? Math.round(nonPaused.reduce((s, h) => s + h.streak, 0) / nonPaused.length)
+    : 0;
+
+  return (
+    <div className="flex justify-between gap-3">
+      <div className="bg-bg/60 border border-border rounded-[10px] w-full px-4 py-3.5">
+        <p className="text-[11.5px] font-medium uppercase tracking-[0.5px] text-text-muted">
+          Hábitos activos
+        </p>
+        <p className="mt-1 text-[24px] font-bold leading-none text-green">
+          {active.length}
+        </p>
+        <p className="mt-1 text-[11.5px] text-text-dim">
+          {archived === 0 ? "Ninguno archivado" : `${archived} archivado${archived !== 1 ? "s" : ""}`}
+        </p>
+      </div>
+
+      <div className="bg-bg/60 border border-border rounded-[10px] w-full px-4 py-3.5">
+        <p className="text-[11.5px] font-medium uppercase tracking-[0.5px] text-text-muted">
+          Racha promedio
+        </p>
+        <p className="mt-1 text-[24px] font-bold leading-none text-amber">
+          {avgStreak}
+          <span className="text-[14px] font-medium text-text-muted ml-1">días</span>
+        </p>
+        <p className="mt-1 text-[11.5px] text-text-dim">Todos los hábitos</p>
+      </div>
+
+      <div className="bg-bg/60 border border-border rounded-[10px] w-full px-4 py-3.5">
+        <p className="text-[11.5px] font-medium uppercase tracking-[0.5px] text-text-muted">
+          Mejor mes
+        </p>
+        <p className="mt-1 text-[24px] font-bold leading-none text-accent-bright">
+          {stats?.bestMonthRate ?? 0}
+          <span className="text-[14px] font-medium text-text-muted ml-1">%</span>
+        </p>
+        <p className="mt-1 text-[11.5px] text-text-dim">
+          {formatMonthKey(stats?.bestMonthKey ?? "")}
+        </p>
+      </div>
+    </div>
+  );
+}

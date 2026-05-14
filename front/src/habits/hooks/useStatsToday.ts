@@ -8,6 +8,8 @@ export interface StatsToday {
   weeklyRate: number;
   bestStreak: number;
   bestStreakHabit: string;
+  bestMonthRate: number;
+  bestMonthKey: string;
 }
 
 export default function useStatsToday() {
