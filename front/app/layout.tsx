@@ -33,7 +33,7 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body
-        className={`${inter.variable} ${dmSans.variable} antialiased w-full min-h-screen flex flex-col bg-bg text-text`}
+        className={`${inter.variable} ${dmSans.variable} antialiased w-full h-screen overflow-hidden flex flex-col bg-bg text-text`}
       >
         {/* Background layer */}
         <div className="app-bg" aria-hidden="true">
@@ -48,7 +48,7 @@ export default function RootLayout({
         <SWRProvider>
           <ConditionalHeader />
           <ConditionalContent>
-            <div className="flex-1 w-full flex flex-col py-6 px-8 h-full gap-7">
+            <div className="flex-1 w-full flex flex-col py-6 px-8 min-h-0 gap-7">
               {children}
             </div>
           </ConditionalContent>
