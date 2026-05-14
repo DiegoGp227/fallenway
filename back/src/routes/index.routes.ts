@@ -19,7 +19,7 @@ import {
   listCategories,
   updateCategoryHandler,
 } from "../modules/categories/categories.controllers.js";
-import { getContributionsHandler, getTodayStatsHandler } from "../modules/stats/stats.controllers.js";
+import { getContributionsHandler, getStatsByRangeHandler, getTodayStatsHandler } from "../modules/stats/stats.controllers.js";
 
 export const router: Router = Router();
 
@@ -42,6 +42,7 @@ router.delete("/habits/:id/log", authMiddleware, deleteHabitLogHandler);
 router.delete("/habits/:id", authMiddleware, deleteHabitHandler);
 
 // Stats Routes
+router.get("/stats", authMiddleware, getStatsByRangeHandler);
 router.get("/stats/today", authMiddleware, getTodayStatsHandler);
 router.get("/stats/contributions", authMiddleware, getContributionsHandler);
 

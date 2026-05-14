@@ -1,6 +1,6 @@
 import { LogStatus } from "@prisma/client";
 import prisma from "../../db/prisma.js";
-import { computeBestStreak, getTodayInTimezone, getWeekBounds, isHabitDueOnDate, isDueOnDateWithWeekLogs } from "../habits/habits.utils.js";
+import { computeBestStreak, computeStreak, getTodayInTimezone, getWeekBounds, isHabitDueOnDate, isDueOnDateWithWeekLogs } from "../habits/habits.utils.js";
 
 export const getContributions = async (userId: string) => {
   const user = await prisma.user.findUnique({
@@ -148,4 +148,75 @@ export const getTodayStats = async (userId: string) => {
   }
 
   return { completedToday, totalToday, weeklyRate, bestStreak, bestStreakHabit, bestMonthRate, bestMonthKey };
+};
+
+export const getStatsByRange = async (userId: string, range: string) => {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { timezone: true },
+  });
+  const timezone = user?.timezone ?? "America/Bogota";
+  const todayStr = getTodayInTimezone(timezone);
+  const today = new Date(todayStr + "T00:00:00.000Z");
+
+  const start = new Date(today);
+  if (range === "week") start.setUTCDate(today.getUTCDate() - 6);
+  else if (range === "month") start.setUTCDate(today.getUTCDate() - 29);
+  else start.setUTCFullYear(today.getUTCFullYear(), 0, 1);
+
+  const habits = await prisma.habit.findMany({
+    where: { userId, active: true, paused: false },
+    include: { logs: true },
+  });
+
+  // Build per-habit log maps for O(1) lookup
+  const habitItems = habits.map((habit) => ({
+    habit,
+    logMap: new Map(habit.logs.map((l) => [l.date.getTime(), l])),
+    applicable: 0,
+    completed: 0,
+  }));
+
+  // Single pass over the period: compute aggregate and per-habit stats together
+  let totalCompleted = 0;
+  let totalExpected = 0;
+  let perfectDays = 0;
+
+  const cursor = new Date(start);
+  while (cursor <= today) {
+    let dayCompleted = 0;
+    let dayTotal = 0;
+    for (const item of habitItems) {
+      if (isHabitDueOnDate({ ...item.habit }, cursor)) {
+        item.applicable++;
+        dayTotal++;
+        const log = item.logMap.get(cursor.getTime());
+        if (log?.status === LogStatus.COMPLETED) {
+          item.completed++;
+          dayCompleted++;
+        }
+      }
+    }
+    totalCompleted += dayCompleted;
+    totalExpected += dayTotal;
+    if (dayTotal > 0 && dayCompleted >= dayTotal) perfectDays++;
+    cursor.setUTCDate(cursor.getUTCDate() + 1);
+  }
+
+  const completionRate = totalExpected > 0
+    ? Math.round((totalCompleted / totalExpected) * 100)
+    : 0;
+
+  const habitRates = habitItems
+    .map(({ habit, applicable, completed }) => ({
+      id: habit.id,
+      name: habit.name,
+      color: habit.color,
+      rate: applicable > 0 ? Math.round((completed / applicable) * 100) : 0,
+      streak: computeStreak({ ...habit, logs: habit.logs }, todayStr),
+      bestStreak: computeBestStreak({ ...habit, logs: habit.logs }),
+    }))
+    .sort((a, b) => b.rate - a.rate);
+
+  return { completionRate, perfectDays, totalCompleted, totalExpected, habitRates };
 };
