@@ -1,7 +1,7 @@
 interface HeaderInfoPorps {
     title: string
     subTitle: string
-    children: React.ReactNode;
+    children?: React.ReactNode;
 }
 
 export default function HeaderInfo({ title, subTitle, children }: HeaderInfoPorps) {

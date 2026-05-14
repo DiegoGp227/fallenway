@@ -6,7 +6,6 @@ import HabitsOverview from "./components/organism/HabitsOverview";
 export default function HabitPage() {
     return (<>
         <HeaderInfo title="Habits" subTitle="Manage and organize your habits">
-            <ProgressBadge completed={6} total={6} />
         </HeaderInfo>
         <HabitsOverview />
         <HabitOrganism />

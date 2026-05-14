@@ -5,6 +5,7 @@ import { mutate } from "swr";
 import HabitFormModal from "@/app/habits/components/organism/HabitFormModal";
 import { HABITS_TODAY_KEY } from "@/src/habits/hooks/useTodayHabits";
 import HabitSistem from "./HabitSistem";
+import { SquarePlus } from "lucide-react";
 
 export default function HabitList() {
   const [creating, setCreating] = useState(false);
@@ -28,9 +29,9 @@ export default function HabitList() {
       <div className="px-3.5 py-2 border-t border-border shrink-0">
         <button
           onClick={() => setCreating(true)}
-          className="flex items-center justify-center gap-1.5 w-full py-2 rounded-[6px] border border-dashed border-border text-[13px] font-medium text-text-dim hover:border-accent hover:text-accent-bright transition-colors duration-150"
+          className="flex items-center justify-center gap-1.5 w-full py-2 rounded-md border border-dashed border-border text-[13px] font-medium text-text-dim hover:border-accent hover:text-accent-bright transition-colors duration-150"
         >
-          ＋ Agregar hábito
+          <SquarePlus /> Add Habit
         </button>
       </div>
 

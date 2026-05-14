@@ -3,13 +3,12 @@
 import { useLogin } from "@/src/auth/hooks/useLogin";
 import { ICredentials } from "@/src/auth/types/auth.types";
 import { SendHorizontal } from "lucide-react";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 
 const DEMO_CREDENTIALS: ICredentials = {
-  email: "demo@skemap.dev",
+  email: "demo@habitos.app",
   password: "demo1234",
 };
 
