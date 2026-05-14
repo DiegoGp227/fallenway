@@ -3,7 +3,7 @@
 import { usePathname } from "next/navigation";
 import Slider from "./Slider";
 
-const HEADER_ROUTES = ["/", "/habits"];
+const HEADER_ROUTES = ["/", "/habits", "/stats"];
 
 export default function ConditionalHeader() {
   const pathname = usePathname();

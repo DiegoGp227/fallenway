@@ -167,13 +167,13 @@ export default function HabitTable({ data, loading, error, onEdit, onAdd }: Prop
             <div className="flex gap-2">
               <button
                 onClick={() => setDeletingHabit(null)}
-                className="flex-1 py-2 rounded-[8px] border border-border text-[13px] font-medium text-text-dim hover:border-border-hover hover:text-text transition-colors"
+                className="flex-1 py-2 rounded-lg border border-border text-[13px] font-medium text-text-dim hover:border-border-hover hover:text-text transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={handleDelete}
-                className="flex-1 py-2 rounded-[8px] bg-accent border border-accent text-[13px] font-semibold text-white hover:bg-accent-bright transition-colors"
+                className="flex-1 py-2 rounded-lg bg-accent border border-accent text-[13px] font-semibold text-white hover:bg-accent-bright transition-colors"
               >
                 Delete
               </button>
