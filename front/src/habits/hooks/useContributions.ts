@@ -15,13 +15,15 @@ interface ContributionsResponse {
 
 export default function useContributions() {
   const url = ContributionsUrl.toString();
-  const { data, isLoading, error } = useSWR(url, () =>
-    fetcher<ContributionsResponse>(url)
+  const { data, isLoading, isValidating, error } = useSWR(url, () =>
+    fetcher<ContributionsResponse>(url),
+    { keepPreviousData: true }
   );
 
   return {
     contributions: data?.contributions ?? [],
     loading: isLoading,
+    refreshing: isValidating,
     error: error ? "Error loading contributions" : null,
   };
 }
