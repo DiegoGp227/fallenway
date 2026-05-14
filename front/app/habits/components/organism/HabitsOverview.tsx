@@ -3,7 +3,7 @@
 import useHabits from "@/src/habits/hooks/useHabits";
 import useStatsToday from "@/src/habits/hooks/useStatsToday";
 
-const MONTHS = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 
 function formatMonthKey(key: string): string {
   if (!key) return "—";
@@ -16,7 +16,7 @@ export default function HabitsOverview() {
   const { stats }  = useStatsToday();
 
   const active   = habits.filter((h) => h.active);
-  const archived = habits.filter((h) => !h.active).length;
+  const paused = habits.filter((h) => h.active && h.paused).length;
 
   const nonPaused = active.filter((h) => !h.paused);
   const avgStreak = nonPaused.length > 0
@@ -27,30 +27,30 @@ export default function HabitsOverview() {
     <div className="flex justify-between gap-3">
       <div className="bg-bg/60 border border-border rounded-[10px] w-full px-4 py-3.5">
         <p className="text-[11.5px] font-medium uppercase tracking-[0.5px] text-text-muted">
-          Hábitos activos
+          Active habits
         </p>
         <p className="mt-1 text-[24px] font-bold leading-none text-green">
           {active.length}
         </p>
         <p className="mt-1 text-[11.5px] text-text-dim">
-          {archived === 0 ? "Ninguno archivado" : `${archived} archivado${archived !== 1 ? "s" : ""}`}
+          {paused === 0 ? "None paused" : `${paused} paused`}
         </p>
       </div>
 
       <div className="bg-bg/60 border border-border rounded-[10px] w-full px-4 py-3.5">
         <p className="text-[11.5px] font-medium uppercase tracking-[0.5px] text-text-muted">
-          Racha promedio
+          Average streak
         </p>
         <p className="mt-1 text-[24px] font-bold leading-none text-amber">
           {avgStreak}
-          <span className="text-[14px] font-medium text-text-muted ml-1">días</span>
+          <span className="text-[14px] font-medium text-text-muted ml-1">days</span>
         </p>
-        <p className="mt-1 text-[11.5px] text-text-dim">Todos los hábitos</p>
+        <p className="mt-1 text-[11.5px] text-text-dim">All habits</p>
       </div>
 
       <div className="bg-bg/60 border border-border rounded-[10px] w-full px-4 py-3.5">
         <p className="text-[11.5px] font-medium uppercase tracking-[0.5px] text-text-muted">
-          Mejor mes
+          Best month
         </p>
         <p className="mt-1 text-[24px] font-bold leading-none text-accent-bright">
           {stats?.bestMonthRate ?? 0}
