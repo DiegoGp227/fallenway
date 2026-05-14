@@ -22,7 +22,7 @@ export const getHabits = async (userId: string) => {
   const todayStr = getTodayInTimezone(timezone);
 
   const habits = await prisma.habit.findMany({
-    where: { userId, active: true },
+    where: { userId },
     include: {
       subtasks: { orderBy: { sortOrder: "asc" } },
       category: true,
