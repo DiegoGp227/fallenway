@@ -3,8 +3,8 @@ import { ValidationError } from "../../errors/appError.js";
 import { asyncHandler } from "../../middlewares/asyncHandler.js";
 import { createHabitSchema, logHabitSchema, reorderHabitsSchema, updateHabitSchema } from "./habits.schemas.js";
 import {
-  archiveHabit,
   createHabit,
+  deleteHabit,
   deleteHabitLog,
   getHabitById,
   getHabits,
@@ -59,9 +59,9 @@ export const updateHabitHandler = asyncHandler(async (req: Request, res: Respons
   res.status(200).json({ habit });
 });
 
-export const archiveHabitHandler = asyncHandler(async (req: Request, res: Response) => {
-  await archiveHabit(req.params.id as string, req.user!.id);
-  res.status(200).json({ message: "Habit archived" });
+export const deleteHabitHandler = asyncHandler(async (req: Request, res: Response) => {
+  await deleteHabit(req.params.id as string, req.user!.id);
+  res.status(200).json({ message: "Habit deleted" });
 });
 
 export const reorderHabitsHandler = asyncHandler(async (req: Request, res: Response) => {

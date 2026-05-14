@@ -201,16 +201,13 @@ export const reorderHabits = async (userId: string, data: ReorderHabitsDTO) => {
   );
 };
 
-export const archiveHabit = async (habitId: string, userId: string) => {
+export const deleteHabit = async (habitId: string, userId: string) => {
   const habit = await prisma.habit.findUnique({ where: { id: habitId } });
 
   if (!habit) throw new NotFoundError("Habit not found");
   if (habit.userId !== userId) throw new ForbiddenError("Access denied");
 
-  return prisma.habit.update({
-    where: { id: habitId },
-    data: { active: false, archivedAt: new Date() },
-  });
+  return prisma.habit.delete({ where: { id: habitId } });
 };
 
 async function recalcDailyContribution(userId: string, todayStr: string): Promise<void> {

@@ -3,8 +3,8 @@ import dbCheck from "../modules/test/test.js";
 import { login, signup } from "../modules/auth/auth.controllers.js";
 import { authMiddleware } from "../middlewares/auth.middleware.js";
 import {
-  archiveHabitHandler,
   createHabitHandler,
+  deleteHabitHandler,
   deleteHabitLogHandler,
   getHabit,
   getTodayHabits,
@@ -39,7 +39,7 @@ router.get("/habits/:id", authMiddleware, getHabit);
 router.patch("/habits/:id", authMiddleware, updateHabitHandler);
 router.post("/habits/:id/log", authMiddleware, logHabitHandler);
 router.delete("/habits/:id/log", authMiddleware, deleteHabitLogHandler);
-router.delete("/habits/:id", authMiddleware, archiveHabitHandler);
+router.delete("/habits/:id", authMiddleware, deleteHabitHandler);
 
 // Stats Routes
 router.get("/stats/today", authMiddleware, getTodayStatsHandler);

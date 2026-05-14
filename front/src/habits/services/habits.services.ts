@@ -32,7 +32,7 @@ export function updateHabit(id: string, data: Partial<Habit>): Promise<{ habit: 
   return patchFetcher<{ habit: Habit }>(`${HabitsURL}/${id}`, data);
 }
 
-export function archiveHabit(id: string): Promise<{ message: string }> {
+export function deleteHabit(id: string): Promise<{ message: string }> {
   return deleteFetcher(`${HabitsURL}/${id}`);
 }
 
