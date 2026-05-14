@@ -1,13 +1,6 @@
 import { createColumnHelper } from "@tanstack/react-table";
 import { Habit, WeekDayStatus } from "@/src/habits/types/habits.types";
 
-const frequencyLabel: Record<string, string> = {
-  DAILY: "Todos los días",
-  SPECIFIC_DAYS: "Días específicos",
-  TIMES_PER_WEEK: "Veces por semana",
-  EVERY_N_DAYS: "Cada N días",
-};
-
 const weekDayStyles: Record<WeekDayStatus, string> = {
   done: "bg-accent",
   skip: "bg-[rgba(245,166,35,0.35)]",
@@ -15,21 +8,25 @@ const weekDayStyles: Record<WeekDayStatus, string> = {
   na: "bg-border opacity-30",
 };
 
+export interface HabitTableMeta {
+  onEdit: (habit: Habit) => void;
+  onPause: (id: string, paused: boolean) => void;
+  onDelete: (habit: Habit) => void;
+}
+
 const columnHelper = createColumnHelper<Habit>();
 
 export const habitColumns = [
-  columnHelper.display({
-    id: "drag",
-    header: () => null,
-    cell: () => (
-      <span className="text-text-dim cursor-grab text-xs select-none">⠿</span>
-    ),
-  }),
-
   columnHelper.accessor("name", {
-    header: "Hábito",
+    header: "Habit",
     cell: (info) => {
       const { category, frequency, paused } = info.row.original;
+      const freqLabel: Record<string, string> = {
+        DAILY: "Every day",
+        SPECIFIC_DAYS: "Specific days",
+        TIMES_PER_WEEK: "Times per week",
+        EVERY_N_DAYS: "Every N days",
+      };
       return (
         <div className="flex flex-col gap-0.5 min-w-0">
           <div className="flex items-center gap-2">
@@ -50,20 +47,18 @@ export const habitColumns = [
             )}
             {paused && (
               <span className="text-[10.5px] text-text-dim bg-border rounded-full px-1.5 py-px shrink-0">
-                Pausado
+                Paused
               </span>
             )}
           </div>
-          <span className="text-[11.5px] text-text-dim">
-            {frequencyLabel[frequency]}
-          </span>
+          <span className="text-[11.5px] text-text-dim">{freqLabel[frequency]}</span>
         </div>
       );
     },
   }),
 
   columnHelper.accessor("streak", {
-    header: "Racha actual",
+    header: "Streak",
     cell: (info) => {
       const streak = info.getValue();
       return streak > 0 ? (
@@ -72,14 +67,14 @@ export const habitColumns = [
         </span>
       ) : (
         <span className="inline-flex items-center gap-1 bg-border/60 border border-border rounded-full px-2 py-0.5 text-[11.5px] font-semibold text-text-dim whitespace-nowrap">
-          — {streak}
+          — 0
         </span>
       );
     },
   }),
 
   columnHelper.accessor("bestStreak", {
-    header: "Mejor",
+    header: "Best",
     cell: (info) => (
       <span className="text-[13px] font-semibold text-text-muted">
         {info.getValue()}
@@ -89,7 +84,7 @@ export const habitColumns = [
   }),
 
   columnHelper.accessor("weekStatus", {
-    header: "Esta semana",
+    header: "This week",
     cell: (info) => (
       <div className="flex gap-0.75">
         {info.getValue().map((status, i) => (
@@ -100,11 +95,11 @@ export const habitColumns = [
   }),
 
   columnHelper.accessor("monthRate", {
-    header: "Tasa mes",
+    header: "Month rate",
     cell: (info) => {
       const rate = info.getValue();
       return (
-        <div className="flex flex-col gap-1">
+        <div className="flex flex-col gap-1 min-w-[60px]">
           <div className="h-1 bg-border rounded-full overflow-hidden">
             <div
               className={`h-full rounded-full ${rate >= 70 ? "bg-green" : "bg-accent"}`}
@@ -119,18 +114,31 @@ export const habitColumns = [
 
   columnHelper.display({
     id: "actions",
-    header: () => <span className="block text-right">Acciones</span>,
+    header: () => <span className="block text-right">Actions</span>,
     cell: (info) => {
-      const { paused } = info.row.original;
+      const { paused, id } = info.row.original;
+      const meta = info.table.options.meta as HabitTableMeta | undefined;
       return (
         <div className="flex gap-1.5 justify-end opacity-0 group-hover:opacity-100 transition-opacity duration-150">
-          <button className="w-6.5 h-6.5 rounded flex items-center justify-center border border-border text-text-dim text-xs hover:text-text hover:border-border-hover transition-colors">
+          <button
+            onClick={() => meta?.onEdit(info.row.original)}
+            className="w-6.5 h-6.5 rounded flex items-center justify-center border border-border text-text-dim text-xs hover:text-text hover:border-border-hover transition-colors"
+            title="Edit"
+          >
             ✎
           </button>
-          <button className="w-6.5 h-6.5 rounded flex items-center justify-center border border-border text-text-dim text-xs hover:text-text hover:border-border-hover transition-colors">
+          <button
+            onClick={() => meta?.onPause(id, paused)}
+            className="w-6.5 h-6.5 rounded flex items-center justify-center border border-border text-text-dim text-xs hover:text-text hover:border-border-hover transition-colors"
+            title={paused ? "Resume" : "Pause"}
+          >
             {paused ? "▶" : "⏸"}
           </button>
-          <button className="w-6.5 h-6.5 rounded flex items-center justify-center border border-border text-text-dim text-xs hover:text-accent-bright hover:border-accent transition-colors">
+          <button
+            onClick={() => meta?.onDelete(info.row.original)}
+            className="w-6.5 h-6.5 rounded flex items-center justify-center border border-border text-text-dim text-xs hover:text-accent-bright hover:border-accent transition-colors"
+            title="Delete"
+          >
             ✕
           </button>
         </div>

@@ -6,28 +6,39 @@ import { Habit } from "@/src/habits/types/habits.types";
 import HabitTable from "./HabitTable";
 import HabitFormModal from "./HabitFormModal";
 
-type Filter = "all" | "active" | "paused" | "archived";
+type Filter = "all" | "active" | "paused";
 
 const TABS: { key: Filter; label: string }[] = [
-  { key: "all",      label: "All" },
-  { key: "active",   label: "Active" },
-  { key: "paused",   label: "Paused" },
-  { key: "archived", label: "Archived" },
+  { key: "all",    label: "All" },
+  { key: "active", label: "Active" },
+  { key: "paused", label: "Paused" },
 ];
+
+function applyFilter(habits: Habit[], filter: Filter): Habit[] {
+  switch (filter) {
+    case "active": return habits.filter((h) => h.active && !h.paused);
+    case "paused": return habits.filter((h) => h.active && h.paused);
+    default:       return habits.filter((h) => h.active);
+  }
+}
 
 export default function HabitOrganism() {
   const { habits, loading, error } = useHabits();
-  const [filter, setFilter]         = useState<Filter>("all");
+  const [filter, setFilter]             = useState<Filter>("all");
   const [sortByStreak, setSortByStreak] = useState(false);
   const [editingHabit, setEditingHabit] = useState<Habit | null>(null);
-  const [creating, setCreating]     = useState(false);
+  const [creating, setCreating]         = useState(false);
 
   const counts: Record<Filter, number> = {
-    all:      habits.filter((h) => h.active).length,
-    active:   habits.filter((h) => h.active && !h.paused).length,
-    paused:   habits.filter((h) => h.active && h.paused).length,
-    archived: habits.filter((h) => !h.active).length,
+    all:    habits.filter((h) => h.active).length,
+    active: habits.filter((h) => h.active && !h.paused).length,
+    paused: habits.filter((h) => h.active && h.paused).length,
   };
+
+  const filtered = applyFilter(habits, filter);
+  const data = sortByStreak
+    ? [...filtered].sort((a, b) => b.streak - a.streak)
+    : filtered;
 
   return (
     <div className="flex flex-col gap-4 flex-1 min-h-0">
@@ -62,22 +73,13 @@ export default function HabitOrganism() {
           >
             ↕ Sort by streak
           </button>
-
-          <button
-            onClick={() => setCreating(true)}
-            className="px-3 py-1.5 rounded-lg text-[13px] font-semibold bg-accent text-white hover:bg-accent-bright transition-colors"
-          >
-            + New habit
-          </button>
         </div>
       </div>
 
       <HabitTable
-        habits={habits}
+        data={data}
         loading={loading}
         error={error}
-        filter={filter}
-        sortByStreak={sortByStreak}
         onEdit={setEditingHabit}
         onAdd={() => setCreating(true)}
       />
