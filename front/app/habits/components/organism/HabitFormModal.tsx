@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { mutate } from "swr";
 import { createHabit, updateHabit } from "@/src/habits/services/habits.services";
 import { Habit } from "@/src/habits/types/habits.types";
+import Modal from "@/app/components/molecules/Modal";
 
 const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
@@ -82,26 +83,8 @@ export default function HabitFormModal({ habit, onClose }: Props) {
   };
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      onClick={(e) => e.target === e.currentTarget && onClose()}
-    >
-      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
-
-      <div className="relative bg-surface border border-border rounded-[12px] w-full max-w-md p-6 flex flex-col gap-5 z-10">
-        <div className="flex items-center justify-between">
-          <h2 className="text-[15px] font-semibold text-text">
-            {isEdit ? "Edit habit" : "New habit"}
-          </h2>
-          <button
-            onClick={onClose}
-            className="text-text-dim hover:text-text transition-colors text-lg leading-none"
-          >
-            ✕
-          </button>
-        </div>
-
-        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+    <Modal onClose={onClose} title={isEdit ? "Edit habit" : "New habit"}>
+      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
             <label className="text-[11.5px] font-medium text-text-muted uppercase tracking-[0.04em]">
               Name
@@ -209,8 +192,7 @@ export default function HabitFormModal({ habit, onClose }: Props) {
               {isSubmitting ? "Saving…" : isEdit ? "Save changes" : "Create habit"}
             </button>
           </div>
-        </form>
-      </div>
-    </div>
+      </form>
+    </Modal>
   );
 }
