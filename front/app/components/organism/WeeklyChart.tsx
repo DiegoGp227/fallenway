@@ -51,7 +51,7 @@ export default function WeeklyChart() {
       {/* Chart */}
       <div className="flex gap-2">
         {/* Y axis */}
-        <div className="flex flex-col justify-between pb-[18px] shrink-0">
+        <div className="flex flex-col justify-between pb-4.5 shrink-0">
           {[100, 75, 50, 25, 0].map((v) => (
             <span key={v} className="text-[9px] text-text-dim leading-none">{v}</span>
           ))}
@@ -60,7 +60,7 @@ export default function WeeklyChart() {
         {/* Bars + grid */}
         <div className="flex-1 relative overflow-visible">
           {/* Horizontal grid lines */}
-          <div className="absolute inset-0 bottom-[18px] flex flex-col justify-between pointer-events-none">
+          <div className="absolute inset-0 bottom-4.5 flex flex-col justify-between pointer-events-none">
             {[0, 1, 2, 3, 4].map((i) => (
               <div key={i} className="w-full h-px bg-border" />
             ))}
@@ -71,7 +71,7 @@ export default function WeeklyChart() {
             {days.map((day, i) => (
               <div
                 key={i}
-                className="group/bar flex-1 flex flex-col items-center h-full justify-end gap-[5px] relative"
+                className="group/bar flex-1 flex flex-col items-center h-full justify-end gap-1.25 relative"
               >
                 {/* Tooltip */}
                 <div

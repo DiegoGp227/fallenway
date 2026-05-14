@@ -123,7 +123,7 @@ export default function YearHeatmap() {
         {/* Day labels + grid */}
         <div className="flex gap-1">
           {/* Day labels */}
-          <div className="flex flex-col gap-[2px] shrink-0" style={{ width: dayLabelWidth }}>
+          <div className="flex flex-col gap-0.5 shrink-0" style={{ width: dayLabelWidth }}>
             {DAY_LABELS.map((label) => (
               <div
                 key={label}
