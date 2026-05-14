@@ -24,22 +24,28 @@ const PUBLIC_ROUTES = ["/auth"];
 
 export const SWRProvider = ({ children }: { children: ReactNode }) => {
   const [isClient, setIsClient] = useState(false);
+  const [authChecked, setAuthChecked] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
 
-  // Ensure StoreProvider is only used in the client-side
   useEffect(() => {
     setIsClient(true);
   }, []);
 
   useEffect(() => {
     if (!isClient) return;
-    if (PUBLIC_ROUTES.includes(pathname)) return;
+
+    if (PUBLIC_ROUTES.includes(pathname)) {
+      setAuthChecked(true);
+      return;
+    }
 
     const token = localStorage.getItem("token");
     if (!token || isTokenExpired(token)) {
       localStorage.removeItem("token");
       router.replace("/auth");
+    } else {
+      setAuthChecked(true);
     }
   }, [isClient, pathname, router]);
 
@@ -54,7 +60,7 @@ export const SWRProvider = ({ children }: { children: ReactNode }) => {
       window.removeEventListener("app:unauthorized", handleUnauthorized);
   }, [router]);
 
-  if (!isClient) {
+  if (!isClient || !authChecked) {
     return null;
   }
   return (

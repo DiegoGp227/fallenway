@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HabitOS · Settings</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #13162a;
+      --surface: #1c1f35;
+      --border: #252840;
+      --border-hover: #333650;
+      --accent: #f01454;
+      --accent-dark: #a00d38;
+      --accent-bright: #f5527a;
+      --green: #2dd4a0;
+      --amber: #f5a623;
+      --text: #c0c4e2;
+      --text-muted: #7a7e9a;
+      --text-dim: #40445e;
+      --completed-bg: #0f1120;
+      --nav-hover: #1a1d33;
+      --radius: 10px;
+      --radius-sm: 6px;
+    }
+
+    html, body { height: 100%; background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, sans-serif; font-size: 14px; line-height: 1.5; }
+
+    .layout { display: flex; height: 100vh; overflow: hidden; }
+
+    /* ── SIDEBAR ── */
+    .sidebar { width: 200px; flex-shrink: 0; background: var(--surface); border-right: 0.5px solid var(--border); display: flex; flex-direction: column; padding: 20px 0; }
+    .sidebar-logo { padding: 0 18px 24px; border-bottom: 0.5px solid var(--border); margin-bottom: 12px; }
+    .logo-text { font-size: 17px; font-weight: 700; letter-spacing: -0.3px; color: var(--text); }
+    .logo-text span { color: var(--accent); }
+    .logo-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+    .nav { display: flex; flex-direction: column; gap: 2px; padding: 0 10px; }
+    .nav-item { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: var(--radius-sm); color: var(--text-muted); cursor: pointer; font-size: 13.5px; font-weight: 500; transition: background 0.15s, color 0.15s; user-select: none; text-decoration: none; }
+    .nav-item:hover { background: var(--nav-hover); color: var(--text); }
+    .nav-item.active { background: rgba(240, 20, 84, 0.15); color: var(--accent-bright); }
+    .nav-icon { width: 16px; text-align: center; font-size: 14px; opacity: 0.9; }
+    .sidebar-footer { margin-top: auto; padding: 16px 18px 0; border-top: 0.5px solid var(--border); }
+    .user-pill { display: flex; align-items: center; gap: 8px; }
+    .avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--accent-dark); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #fff; flex-shrink: 0; }
+    .user-name { font-size: 12.5px; font-weight: 500; color: var(--text-muted); }
+
+    /* ── MAIN ── */
+    .main { flex: 1; overflow: hidden; display: flex; flex-direction: column; padding: 24px 28px; gap: 18px; }
+
+    /* ── HEADER ── */
+    .header { flex-shrink: 0; }
+    .header h1 { font-size: 20px; font-weight: 700; letter-spacing: -0.4px; }
+    .header .sub { font-size: 12.5px; color: var(--text-muted); margin-top: 2px; }
+
+    /* ── CONTENT ── */
+    .content { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; max-width: 580px; padding-right: 4px; }
+    .content::-webkit-scrollbar { width: 4px; }
+    .content::-webkit-scrollbar-track { background: transparent; }
+    .content::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+    /* ── SECTION CARD ── */
+    .card { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); overflow: hidden; flex-shrink: 0; }
+    .card-header { padding: 14px 18px; border-bottom: 0.5px solid var(--border); }
+    .card-title { font-size: 13px; font-weight: 600; color: var(--text); }
+    .card-desc { font-size: 11.5px; color: var(--text-dim); margin-top: 2px; }
+    .card-footer { padding: 12px 18px; border-top: 0.5px solid var(--border); display: flex; justify-content: flex-end; gap: 8px; }
+
+    /* ── PROFILE ── */
+    .profile-body { padding: 18px; display: flex; flex-direction: column; gap: 18px; }
+    .avatar-row { display: flex; align-items: center; gap: 14px; }
+    .avatar-lg { width: 52px; height: 52px; border-radius: 50%; background: var(--accent-dark); display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 700; color: #fff; flex-shrink: 0; }
+    .avatar-meta { flex: 1; }
+    .avatar-name { font-size: 15px; font-weight: 600; color: var(--text); }
+    .avatar-since { font-size: 11.5px; color: var(--text-dim); margin-top: 2px; }
+    .btn-ghost { font-size: 12px; color: var(--text-muted); border: 0.5px solid var(--border); background: none; border-radius: var(--radius-sm); padding: 5px 12px; cursor: pointer; font-family: inherit; transition: color 0.15s, border-color 0.15s; white-space: nowrap; }
+    .btn-ghost:hover { color: var(--text); border-color: var(--border-hover); }
+
+    .field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .field { display: flex; flex-direction: column; gap: 5px; }
+    .field.full { grid-column: 1 / -1; }
+    .field-label { font-size: 11.5px; font-weight: 500; color: var(--text-muted); }
+    .field-input { background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--radius-sm); padding: 7px 10px; font-size: 13px; color: var(--text); font-family: inherit; outline: none; transition: border-color 0.15s; }
+    .field-input:focus { border-color: var(--accent); }
+    .field-input[readonly] { color: var(--text-muted); cursor: default; }
+
+    /* ── ROWS (shared by preferences, notifs, data) ── */
+    .row-list { padding: 2px 0; }
+    .row { display: flex; align-items: center; justify-content: space-between; padding: 12px 18px; border-bottom: 0.5px solid var(--border); gap: 20px; }
+    .row:last-child { border-bottom: none; }
+    .row-left { flex: 1; min-width: 0; }
+    .row-label { font-size: 13px; font-weight: 500; color: var(--text); }
+    .row-hint { font-size: 11.5px; color: var(--text-dim); margin-top: 2px; }
+    .row-right { flex-shrink: 0; }
+
+    /* ── CONTROLS ── */
+    .select { background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--radius-sm); padding: 6px 26px 6px 10px; font-size: 12.5px; color: var(--text); font-family: inherit; outline: none; cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='none'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%237a7e9a' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 8px center; transition: border-color 0.15s; }
+    .select:focus { border-color: var(--accent); }
+    .select option { background: var(--surface); }
+
+    .toggle { position: relative; width: 36px; height: 20px; display: inline-block; }
+    .toggle input { display: none; }
+    .toggle-track { display: block; width: 36px; height: 20px; background: var(--border); border-radius: 20px; cursor: pointer; transition: background 0.2s; }
+    .toggle input:checked + .toggle-track { background: var(--accent); }
+    .toggle-thumb { position: absolute; top: 3px; left: 3px; width: 14px; height: 14px; background: #fff; border-radius: 50%; transition: transform 0.2s; pointer-events: none; }
+    .toggle input:checked ~ .toggle-thumb { transform: translateX(16px); }
+
+    .time-input { background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--radius-sm); padding: 6px 10px; font-size: 12.5px; color: var(--text); font-family: inherit; outline: none; width: 82px; transition: border-color 0.15s; }
+    .time-input:focus { border-color: var(--accent); }
+
+    /* ── BUTTONS ── */
+    .btn-save { background: var(--accent); color: #fff; border: none; border-radius: var(--radius-sm); padding: 7px 16px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; transition: background 0.15s; }
+    .btn-save:hover { background: var(--accent-bright); }
+    .btn-cancel { background: none; color: var(--text-muted); border: 0.5px solid var(--border); border-radius: var(--radius-sm); padding: 7px 14px; font-size: 13px; font-weight: 500; cursor: pointer; font-family: inherit; transition: all 0.15s; }
+    .btn-cancel:hover { color: var(--text); border-color: var(--border-hover); }
+    .btn-secondary { background: none; color: var(--text-muted); border: 0.5px solid var(--border); border-radius: var(--radius-sm); padding: 6px 14px; font-size: 12.5px; font-weight: 500; cursor: pointer; font-family: inherit; transition: all 0.15s; white-space: nowrap; }
+    .btn-secondary:hover { color: var(--text); border-color: var(--border-hover); }
+
+    /* ── DANGER ZONE ── */
+    .danger-card { background: rgba(240, 20, 84, 0.04); border: 0.5px solid rgba(240, 20, 84, 0.25); border-radius: var(--radius); overflow: hidden; flex-shrink: 0; }
+    .danger-card .card-header { border-bottom-color: rgba(240, 20, 84, 0.15); }
+    .danger-card .card-title { color: var(--accent-bright); }
+    .danger-card .row { border-bottom-color: rgba(240, 20, 84, 0.1); }
+    .btn-danger { background: none; color: var(--accent-bright); border: 0.5px solid rgba(240, 20, 84, 0.4); border-radius: var(--radius-sm); padding: 6px 14px; font-size: 12.5px; font-weight: 500; cursor: pointer; font-family: inherit; transition: all 0.15s; white-space: nowrap; }
+    .btn-danger:hover { background: rgba(240, 20, 84, 0.1); border-color: var(--accent); }
+  </style>
+</head>
+<body>
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-text">Habit<span>OS</span></div>
+      <div class="logo-sub">Personal tracker</div>
+    </div>
+    <nav class="nav">
+      <a class="nav-item" href="index.html"><span class="nav-icon">◈</span>Today</a>
+      <a class="nav-item" href="habits.html"><span class="nav-icon">≡</span>Habits</a>
+      <a class="nav-item" href="stats.html"><span class="nav-icon">↗</span>Stats</a>
+      <a class="nav-item active" href="settings.html"><span class="nav-icon">⚙</span>Settings</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-pill">
+        <div class="avatar">DG</div>
+        <div class="user-name">Diego G.</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <div class="header">
+      <h1>Settings</h1>
+      <div class="sub">Manage your profile and app preferences</div>
+    </div>
+
+    <div class="content">
+
+      <!-- PROFILE -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Profile</div>
+          <div class="card-desc">Your personal information</div>
+        </div>
+        <div class="profile-body">
+          <div class="avatar-row">
+            <div class="avatar-lg">DG</div>
+            <div class="avatar-meta">
+              <div class="avatar-name">Diego G.</div>
+              <div class="avatar-since">Member since January 2026</div>
+            </div>
+            <button class="btn-ghost">Change avatar</button>
+          </div>
+          <div class="field-grid">
+            <div class="field">
+              <label class="field-label">First name</label>
+              <input class="field-input" type="text" value="Diego" />
+            </div>
+            <div class="field">
+              <label class="field-label">Last name</label>
+              <input class="field-input" type="text" value="G." />
+            </div>
+            <div class="field full">
+              <label class="field-label">Email</label>
+              <input class="field-input" type="email" value="diego.gp227@gmail.com" readonly />
+            </div>
+          </div>
+        </div>
+        <div class="card-footer">
+          <button class="btn-cancel">Cancel</button>
+          <button class="btn-save">Save changes</button>
+        </div>
+      </div>
+
+      <!-- PREFERENCES -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Preferences</div>
+          <div class="card-desc">Customize how the app looks and behaves</div>
+        </div>
+        <div class="row-list">
+          <div class="row">
+            <div class="row-left">
+              <div class="row-label">Language</div>
+              <div class="row-hint">Interface display language</div>
+            </div>
+            <div class="row-right">
+              <select class="select">
+                <option selected>English</option>
+                <option>Español</option>
+              </select>
+            </div>
+          </div>
+          <div class="row">
+            <div class="row-left">
+              <div class="row-label">Timezone</div>
+              <div class="row-hint">Used to reset daily habits</div>
+            </div>
+            <div class="row-right">
+              <select class="select">
+                <option>UTC−6 (CST)</option>
+                <option selected>UTC−5 (EST)</option>
+                <option>UTC+0 (GMT)</option>
+                <option>UTC+1 (CET)</option>
+              </select>
+            </div>
+          </div>
+          <div class="row">
+            <div class="row-left">
+              <div class="row-label">Week starts on</div>
+              <div class="row-hint">Affects calendar and weekly stats</div>
+            </div>
+            <div class="row-right">
+              <select class="select">
+                <option selected>Monday</option>
+                <option>Sunday</option>
+              </select>
+            </div>
+          </div>
+          <div class="row">
+            <div class="row-left">
+              <div class="row-label">Time format</div>
+            </div>
+            <div class="row-right">
+              <select class="select">
+                <option>12h (AM/PM)</option>
+                <option selected>24h</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- NOTIFICATIONS -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Notifications</div>
+          <div class="card-desc">Daily reminders and streak alerts</div>
+        </div>
+        <div class="row-list">
+          <div class="row">
+            <div class="row-left">
+              <div class="row-label">Daily reminder</div>
+              <div class="row-hint">Push notification to check your habits</div>
+            </div>
+            <div class="row-right">
+              <label class="toggle">
+                <input type="checkbox" checked />
+                <span class="toggle-track"></span>
+                <span class="toggle-thumb"></span>
+              </label>
+            </div>
+          </div>
+          <div class="row">
+            <div class="row-left">
+              <div class="row-label">Reminder time</div>
+            </div>
+            <div class="row-right">
+              <input class="time-input" type="time" value="20:00" />
+            </div>
+          </div>
+          <div class="row">
+            <div class="row-left">
+              <div class="row-label">Streak alerts</div>
+              <div class="row-hint">Warn when a streak is at risk before midnight</div>
+            </div>
+            <div class="row-right">
+              <label class="toggle">
+                <input type="checkbox" checked />
+                <span class="toggle-track"></span>
+                <span class="toggle-thumb"></span>
+              </label>
+            </div>
+          </div>
+          <div class="row">
+            <div class="row-left">
+              <div class="row-label">Weekly summary</div>
+              <div class="row-hint">Monday recap of last week's performance</div>
+            </div>
+            <div class="row-right">
+              <label class="toggle">
+                <input type="checkbox" />
+                <span class="toggle-track"></span>
+                <span class="toggle-thumb"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DATA & ACCOUNT -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Data & Account</div>
+          <div class="card-desc">Export your data or manage your account</div>
+        </div>
+        <div class="row-list">
+          <div class="row">
+            <div class="row-left">
+              <div class="row-label">Export as JSON</div>
+              <div class="row-hint">Download all your habits and history</div>
+            </div>
+            <button class="btn-secondary">↓ Export</button>
+          </div>
+          <div class="row">
+            <div class="row-left">
+              <div class="row-label">Export as CSV</div>
+              <div class="row-hint">Spreadsheet-compatible format</div>
+            </div>
+            <button class="btn-secondary">↓ Export</button>
+          </div>
+          <div class="row">
+            <div class="row-left">
+              <div class="row-label">Change password</div>
+              <div class="row-hint">Send a reset link to your email</div>
+            </div>
+            <button class="btn-secondary">Send link</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- DANGER ZONE -->
+      <div class="danger-card">
+        <div class="card-header">
+          <div class="card-title">Danger zone</div>
+        </div>
+        <div class="row-list">
+          <div class="row">
+            <div class="row-left">
+              <div class="row-label">Reset all progress</div>
+              <div class="row-hint">Clears all completions and streaks. Habits are kept.</div>
+            </div>
+            <button class="btn-danger">Reset progress</button>
+          </div>
+          <div class="row">
+            <div class="row-left">
+              <div class="row-label">Delete account</div>
+              <div class="row-hint">Permanently deletes your account and all data. Cannot be undone.</div>
+            </div>
+            <button class="btn-danger">Delete account</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+</body>
+</html>
