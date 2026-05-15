@@ -1,21 +1,21 @@
 # Habits — Endpoints
 
-## Lógica central: `GET /api/habits/today`
+## Core logic: `GET /api/habits/today`
 
-El home screen llama este endpoint para saber qué hábitos mostrar hoy y cuáles ya fueron completados.
+The home screen calls this endpoint to determine which habits to show today and which ones have already been completed.
 
-### ¿Cómo se decide si un hábito va hoy?
+### How is it decided whether a habit is due today?
 
-| Frecuencia | Campo | Regla |
-|------------|-------|-------|
-| `DAILY` | — | Siempre aparece |
-| `SPECIFIC_DAYS` | `weekDays: Int[]` | `weekDays.includes(díaDeHoy)` ej: `[1,3,5]` = Lun/Mié/Vie |
-| `TIMES_PER_WEEK` | `timesPerWeek: Int` | Aparece hasta completarlo N veces en la semana actual |
-| `EVERY_N_DAYS` | `intervalDays: Int` | `diasDesde(createdAt) % intervalDays === 0` |
+| Frequency | Field | Rule |
+|---|---|---|
+| `DAILY` | — | Always appears |
+| `SPECIFIC_DAYS` | `weekDays: Int[]` | `weekDays.includes(todayIndex)` e.g. `[1,3,5]` = Mon/Wed/Fri |
+| `TIMES_PER_WEEK` | `timesPerWeek: Int` | Appears until completed N times in the current week |
+| `EVERY_N_DAYS` | `intervalDays: Int` | `daysSince(createdAt) % intervalDays === 0` |
 
-> El "hoy" se resuelve con el `timezone` del usuario (`User.timezone`, default `"America/Bogota"`).
+> "Today" is resolved using the user's `timezone` (`User.timezone`, default `"America/Bogota"`).
 
-### Respuesta de `/today`
+### Response from `/today`
 
 ```json
 {
@@ -23,16 +23,16 @@ El home screen llama este endpoint para saber qué hábitos mostrar hoy y cuále
   "habits": [
     {
       "id": "abc",
-      "name": "Meditar",
+      "name": "Meditate",
       "color": "#7C3AED",
       "frequency": "DAILY",
       "sortOrder": 0,
-      "subtasks": [{ "id": "s1", "name": "5 min respiración" }],
+      "subtasks": [{ "id": "s1", "name": "5 min breathing" }],
       "log": null
     },
     {
       "id": "def",
-      "name": "Ejercicio",
+      "name": "Exercise",
       "color": "#10B981",
       "frequency": "TIMES_PER_WEEK",
       "timesPerWeek": 3,
@@ -40,7 +40,7 @@ El home screen llama este endpoint para saber qué hábitos mostrar hoy y cuále
       "log": {
         "id": "log123",
         "status": "COMPLETED",
-        "note": "30 min corriendo",
+        "note": "30 min run",
         "subtaskLogs": ["s1"]
       }
     }
@@ -48,93 +48,93 @@ El home screen llama este endpoint para saber qué hábitos mostrar hoy y cuále
 }
 ```
 
-- `log: null` → pendiente hoy
-- `log.status: "COMPLETED"` → ya completado
-- `log.status: "SKIPPED"` → saltado intencionalmente
-- `weekProgress` → solo presente en `TIMES_PER_WEEK`
+- `log: null` → pending today
+- `log.status: "COMPLETED"` → already completed
+- `log.status: "SKIPPED"` → intentionally skipped
+- `weekProgress` → only present for `TIMES_PER_WEEK`
 
 ---
 
-## Lista completa de endpoints
+## Full endpoint list
 
-Todos requieren autenticación (`Authorization: Bearer <token>`).
+All endpoints require authentication (`Authorization: Bearer <token>`).
 
-### CRUD de hábitos
-
-```
-GET    /api/habits              Listar hábitos activos del usuario
-POST   /api/habits              Crear hábito
-GET    /api/habits/:id          Obtener uno (incluye subtasks)
-PATCH  /api/habits/:id          Editar (nombre, color, frecuencia, etc.)
-DELETE /api/habits/:id          Archivar — soft delete (active=false, archivedAt=now)
-```
-
-### Vista del día
+### Habit CRUD
 
 ```
-GET    /api/habits/today        Hábitos de hoy + log de cada uno
+GET    /api/habits              List user's active habits
+POST   /api/habits              Create a habit
+GET    /api/habits/:id          Get one (includes subtasks)
+PATCH  /api/habits/:id          Update (name, color, frequency, etc.)
+DELETE /api/habits/:id          Archive — soft delete (active=false, archivedAt=now)
 ```
 
-### Registrar cumplimiento
+### Daily view
 
 ```
-POST   /api/habits/:id/log      Marcar como COMPLETED o SKIPPED para una fecha
+GET    /api/habits/today        Today's habits + their log entry
+```
+
+### Logging completion
+
+```
+POST   /api/habits/:id/log      Mark as COMPLETED or SKIPPED for a given date
                                 Body: { date: "YYYY-MM-DD", status: "COMPLETED"|"SKIPPED", note?: string }
-                                → Hace upsert (constraint único: [habitId, date])
+                                → Upserts (unique constraint: [habitId, date])
 
-DELETE /api/habits/:id/log      Desmarcar — elimina el log del día
+DELETE /api/habits/:id/log      Unmark — removes the log for the day
                                 Query: ?date=YYYY-MM-DD
 
-GET    /api/habits/logs         Historial en rango de fechas
+GET    /api/habits/logs         History within a date range
                                 Query: ?from=YYYY-MM-DD&to=YYYY-MM-DD
 ```
 
 ### Subtasks
 
 ```
-POST   /api/habits/:id/subtasks                     Agregar subtarea
-PATCH  /api/habits/:id/subtasks/:subtaskId          Renombrar / reordenar
-DELETE /api/habits/:id/subtasks/:subtaskId          Eliminar subtarea
+POST   /api/habits/:id/subtasks                     Add a subtask
+PATCH  /api/habits/:id/subtasks/:subtaskId          Rename / reorder
+DELETE /api/habits/:id/subtasks/:subtaskId          Delete a subtask
 ```
 
 ### Subtask logs
 
 ```
 POST   /api/habits/:habitId/logs/:logId/subtasks/:subtaskId/toggle
-       Marcar o desmarcar una subtarea dentro de un log
+       Mark or unmark a subtask within a log entry
 ```
 
 ---
 
-## Orden de implementación
+## Implementation order
 
-1. **CRUD de hábitos** — base de todo
-2. **`GET /today`** — lógica de frecuencias
-3. **Logs** — marcar cumplimiento (upsert)
+1. **Habit CRUD** — foundation for everything else
+2. **`GET /today`** — frequency logic
+3. **Logs** — mark completion (upsert)
 4. **Subtasks CRUD**
 5. **Subtask logs**
 
 ---
 
-## Archivos
+## Files
 
-### Nuevos
+### New
 
 ```
 back/src/modules/habits/
 ├── habits.controllers.ts
-├── habits.services.ts       ← isDueToday() y lógica de semana
+├── habits.services.ts       ← isDueToday() and weekly logic
 ├── habits.schemas.ts        (Zod)
 └── habits.types.ts
 ```
 
-### Modificados
+### Modified
 
 ```
-back/src/routes/index.routes.ts   ← registrar rutas con authMiddleware
+back/src/routes/index.routes.ts   ← register routes with authMiddleware
 ```
 
-### Reutilizar
+### Reuse
 
 ```
 back/src/middlewares/asyncHandler.ts
