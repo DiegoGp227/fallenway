@@ -1,5 +1,6 @@
 "use client";
 
+import { AnimatePresence, motion } from "framer-motion";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import useLogHabit from "@/src/habits/hooks/useLogHabit";
@@ -71,19 +72,26 @@ export default function HabitSecction({ habit }: { habit: TodayHabit }) {
           backgroundColor: isCompleted ? "var(--green)" : "transparent",
         }}
       >
-        {isCompleted && (
-          <svg
-            className="w-2.5 h-2.5 text-bg"
-            viewBox="0 0 12 10"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <polyline points="1,5 4.5,8.5 11,1" />
-          </svg>
-        )}
+        <AnimatePresence>
+          {isCompleted && (
+            <motion.svg
+              key="check"
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0, opacity: 0 }}
+              transition={{ type: "spring", stiffness: 500, damping: 25 }}
+              className="w-2.5 h-2.5 text-bg"
+              viewBox="0 0 12 10"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <polyline points="1,5 4.5,8.5 11,1" />
+            </motion.svg>
+          )}
+        </AnimatePresence>
       </button>
 
       <div className="flex-1 min-w-0">
