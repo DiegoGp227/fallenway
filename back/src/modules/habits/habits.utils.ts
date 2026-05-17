@@ -52,6 +52,9 @@ const daysBetween = (a: Date, b: Date): number =>
 const findLog = (logs: HabitLog[], date: Date): HabitLog | undefined =>
   logs.find((l) => l.date.getTime() === date.getTime());
 
+export const countsAsCompleted = (status: LogStatus): boolean =>
+  status === LogStatus.COMPLETED || status === LogStatus.SKIPPED;
+
 export const isHabitDueOnDate = (habit: HabitForStats, date: Date): boolean => {
   const dow = date.getUTCDay(); // 0=Sun…6=Sat
   switch (habit.frequency) {
@@ -109,10 +112,8 @@ export const computeStreak = (habit: HabitForStats, todayStr: string): number =>
   for (let i = 0; i < maxDays; i++) {
     if (isHabitDueOnDate(habit, current)) {
       const log = findLog(habit.logs, current);
-      if (log?.status === LogStatus.COMPLETED) {
+      if (log && countsAsCompleted(log.status)) {
         streak++;
-      } else if (log?.status === LogStatus.SKIPPED) {
-        // intentional skip: doesn't add to streak but doesn't break it
       } else {
         break;
       }
@@ -135,7 +136,7 @@ export const computeBestStreak = (habit: HabitForStats): number => {
     const date = addDays(created, i);
     if (isHabitDueOnDate(habit, date)) {
       const log = findLog(habit.logs, date);
-      if (log?.status === LogStatus.COMPLETED) {
+      if (log && countsAsCompleted(log.status)) {
         current++;
         if (current > best) best = current;
       } else {
@@ -181,7 +182,7 @@ export const computeMonthRate = (habit: HabitForStats, todayStr: string): number
     if (isHabitDueOnDate(habit, date)) {
       applicable++;
       const log = findLog(habit.logs, date);
-      if (log?.status === LogStatus.COMPLETED) completed++;
+      if (log && countsAsCompleted(log.status)) completed++;
     }
   }
 

@@ -7,6 +7,7 @@ import {
   computeMonthRate,
   computeStreak,
   computeWeekStatus,
+  countsAsCompleted,
   getDayOfWeekInTimezone,
   getTodayInTimezone,
   getWeekBounds,
@@ -229,13 +230,13 @@ async function recalcDailyContribution(userId: string, todayStr: string): Promis
       (l) => l.date.getTime() !== todayDate.getTime(),
     );
     const weekCompletedExcludingToday = weekLogsExcludingToday.filter(
-      (l) => l.status === LogStatus.COMPLETED,
+      (l) => countsAsCompleted(l.status),
     ).length;
 
     if (isDueOnDateWithWeekLogs(habit, todayDate, weekCompletedExcludingToday)) {
       total++;
       const todayLog = habit.logs.find((l) => l.date.getTime() === todayDate.getTime());
-      if (todayLog?.status === LogStatus.COMPLETED) completed++;
+      if (todayLog && countsAsCompleted(todayLog.status)) completed++;
     }
   }
 

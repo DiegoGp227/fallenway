@@ -1,6 +1,5 @@
-import { LogStatus } from "@prisma/client";
 import prisma from "../../db/prisma.js";
-import { computeBestStreak, computeStreak, getTodayInTimezone, getWeekBounds, isHabitDueOnDate, isDueOnDateWithWeekLogs } from "../habits/habits.utils.js";
+import { computeBestStreak, computeStreak, countsAsCompleted, getTodayInTimezone, getWeekBounds, isHabitDueOnDate, isDueOnDateWithWeekLogs } from "../habits/habits.utils.js";
 
 export const getContributions = async (userId: string) => {
   const user = await prisma.user.findUnique({
@@ -44,7 +43,7 @@ export const getContributions = async (userId: string) => {
         if (isHabitDueOnDate({ ...habit }, cursor)) {
           applicable++;
           const log = habit.logs.find((l) => l.date.getTime() === cursor.getTime());
-          if (log?.status === LogStatus.COMPLETED) comp++;
+          if (log && countsAsCompleted(log.status)) comp++;
         }
       }
       completed = comp;
@@ -101,7 +100,7 @@ export const getTodayStats = async (userId: string) => {
   let totalToday = 0;
   for (const habit of habitsToday) {
     const weekCompletedExcludingToday = habit.logs
-      .filter((l) => l.date.getTime() !== todayDate.getTime() && l.status === LogStatus.COMPLETED)
+      .filter((l) => l.date.getTime() !== todayDate.getTime() && countsAsCompleted(l.status))
       .length;
     if (isDueOnDateWithWeekLogs(habit, todayDate, weekCompletedExcludingToday)) {
       totalToday++;
@@ -191,7 +190,7 @@ export const getStatsByRange = async (userId: string, range: string) => {
         item.applicable++;
         dayTotal++;
         const log = item.logMap.get(cursor.getTime());
-        if (log?.status === LogStatus.COMPLETED) {
+        if (log && countsAsCompleted(log.status)) {
           item.completed++;
           dayCompleted++;
         }
