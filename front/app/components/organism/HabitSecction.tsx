@@ -31,7 +31,11 @@ export default function HabitSecction({ habit }: { habit: TodayHabit }) {
 
   const toggle = () => {
     if (loading) return;
-    handleLogHabit(habit.id, { status: isCompleted ? "SKIPPED" : "COMPLETED" });
+    if (isCompleted) {
+      handleDeleteLog(habit.id);
+    } else {
+      handleLogHabit(habit.id, { status: "COMPLETED" });
+    }
   };
 
   const skip = () => {
