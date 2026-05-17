@@ -7,6 +7,7 @@ import TodayOverview from "./components/organism/TodayOverview";
 import WeeklyChart from "./components/organism/WeeklyChart";
 import YearHeatmap from "./components/organism/YearHeatmap";
 import useStatsToday from "@/src/habits/hooks/useStatsToday";
+import TrendChart from "./habits/components/organism/TrendChart";
 
 function formatDate(): string {
   return new Intl.DateTimeFormat("en-US", {
@@ -34,6 +35,7 @@ export default function HomePage() {
         <div className="w-[20%] flex flex-col gap-3 min-h-0">
           <WeeklyChart />
           <YearHeatmap />
+          <TrendChart />
         </div>
       </div>
     </>
