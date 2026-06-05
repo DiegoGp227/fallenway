@@ -58,6 +58,9 @@ export default function SignUpForm() {
         >
           Email
         </label>
+        {errors.email && (
+          <p className="text-red-500 text-sm">{errors.email.message}</p>
+        )}
       </div>
       <div className="flex flex-col">
         <input
@@ -73,6 +76,9 @@ export default function SignUpForm() {
         >
           Password
         </label>
+        {errors.password && (
+          <p className="text-red-500 text-sm">{errors.password.message}</p>
+        )}
       </div>
 
       {error && <p className="text-red-500 text-sm">{error}</p>}
